@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --track-main-color: rgb(255, 255, 255);
+  --track-main-color-hover: rgb(104, 117, 217, 0.2);
+  --track-color: #ddd;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -14,4 +20,53 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.customSlider {
+  /* max width of your slider */
+  max-width: 300px;
+  /* Optional: Only If you want to center your slider in the page */
+  margin: auto;
+}
+
+.customSlider-track {
+  /* Top value to align your track to the center of your thumb */
+  top: 8px;
+  /* thickness of the track */
+  height: 4px;
+ /* default color of your track */
+  background: var(--track-color);
+}
+
+.customSlider-track.customSlider-track-0 {
+  /* color of the track before the thumb */
+  background: var(--track-main-color);
+}
+.customSlider-thumb {
+  cursor: pointer;
+  /*color for the thumb */
+  background: var(--track-main-color);
+  /* shape of the thumb: circle */
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  /* remove default outline when selected */
+  outline: none;
+}
+
+.customSlider-thumb:hover {
+  box-shadow: 0 0 0 8px var(--track-main-color-hover);
+}
+.customSlider-mark {
+  cursor: pointer;
+  top: 6px;
+  width: 1.5px;
+  height: 8px;
+  background-color: var(--mark-color);
+}
+.customSlider-mark.customSlider-mark-before {
+  background-color: var(--track-main-color);
+}
+.customSlider-mark.customSlider-mark-active {
+  display: none;
 }

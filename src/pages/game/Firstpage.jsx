@@ -1,0 +1,68 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import API from "../../provider/API.js";
+
+const Firstpage = ({socket}) => {
+    const navigate = useNavigate();
+    const [isShowGname, setIsShowGname] = useState(false);
+    const [pineCode, setPineCode] = useState();
+    const [username, setUsername] = useState();
+
+    /**
+     * Action of when click button named "Start Game"
+     */
+    const clickStartGame = () => {
+        if(!username) toast.warning("Full Name is Required Fields")
+        if(!pineCode) toast.warning("Game Pine is Required Fields")
+        API.game.checkpine({pineCode, username}).then((res)=>{
+            if(res.data === "dont_exist_game"){
+                toast.warning("Game Pine is not exist. Please use another pine code");return;
+            } else {
+                socket.emit('identity', pineCode, username);
+                navigate(`/game/${pineCode}`, {
+                    state: { gamePine: pineCode, username }
+                });
+            }
+        }).catch(err => {
+            toast.error("Server Error!");
+        })
+    }
+
+    return (
+        <div className="h-screen bg-blue-400 flex justify-center place-items-center">
+            <ToastContainer />
+            <div>
+                <button
+                    onClick={() => setIsShowGname(!isShowGname)}
+                    className="uppercase rounded-full border-4 border-white -mt-5 px-14 py-4 text-white text-3xl font-bold">start game</button>
+                {isShowGname &&
+                    <div className="px-5 absolute m-auto left-0 right-0 w-[300px]">
+                        <div className="bg-slate-100 rounded-b-3xl p-2">
+                            <input
+                                type="text"
+                                onChange={e => setPineCode(e.target.value)}
+                                value={pineCode}
+                                className="p-1 my-2 focus:outline-none w-full"
+                                placeholder="Game Pine" />
+                            <input
+                                type="text"
+                                onChange={e => setUsername(e.target.value)}
+                                value={username}
+                                className="p-1 my-2 focus:outline-none w-full"
+                                placeholder="Your Full Name" />
+                            <div className="flex justify-end mb-2">
+                                <button
+                                    onClick={() => clickStartGame()}
+                                    className="uppercase text-white rounded-full bg-sky-600 py-1 px-5">start</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    )
+}
+
+export default Firstpage;

@@ -1,10 +1,17 @@
+import { useRef } from "react";
+
 const AddQuestion = (props) => {
-    const { qInd, question, handleChangeQuestion } = props;
+    const fileRef = useRef(null);
+
+    const handleClickPicture = () => {
+        fileRef.current?.click();
+    }
+    const { qInd, question, handleChangeQuestion, handleChangePicture } = props;
 
     return (
-        <div className="flex justify-between">
+        <div className="flex justify-between mb-2">
             <div className="w-7/12">
-                <div className="text-xl font-bold">Question { qInd+1 }:</div>
+                <div className="text-xl font-bold">Question {qInd + 1}:</div>
                 <hr className="border-b-1 border-dashed border-custom my-2" />
                 <textarea
                     rows="4"
@@ -14,7 +21,15 @@ const AddQuestion = (props) => {
                     placeholder="This is the propmpt that the students will see." ></textarea>
             </div>
             <div>
-                <img src="/images/defualt_img.png" alt="DF" />
+                <img onClick={ ()=>handleClickPicture() } width="235" src={question.img===""?`/images/defualt_img.png`:`${process.env.REACT_APP_SERVERURL}${question.img}`} alt="DF" />
+                <form action="" method="post" className="hidden" encType="multipart/form-data">
+                    <input
+                        type="file"
+                        name="fileName"
+                        accept=".jpg, .jpeg, .png, .gif"
+                        ref={fileRef}
+                        onChange={(e)=>handleChangePicture(e, qInd)} />
+                </form>
             </div>
         </div>
     )

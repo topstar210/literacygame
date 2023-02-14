@@ -1,30 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import API from "../../provider/API.js";
 import AddQuestion from "../../components/AddQuestion";
+import Slider from "../../components/Slider";
 
-const GameSetting = (props) => {
+const GameSetting = ({ socket }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
     const { gameName, gamePine } = state;
-    
-    const [ questions, setQuestions ] = useState([{val:"",img:""}]);
-    const [ settings, setSettings ] = useState({
+
+    const [currentusers, setCurrentusers] = useState([]);
+    const [questions, setQuestions] = useState([{ val: "", img: "" }]);
+    const [currRule, setCurrRule] = useState('C');
+    const [settings, setSettings] = useState({
         group: 10,
         limitChars: 400,
         writingTimer: 300,
         votingTimer: 70
     });
-    
+
     /**
      * handle event of changing of question textarea
      * @param {Event} e 
      * @param {Number} qInd 
      */
-    const changeQuestion = ( e, qInd ) => {
-        let tempQ = [ ...questions ];
+    const changeQuestion = (e, qInd) => {
+        let tempQ = [...questions];
         tempQ[qInd]['val'] = e.target.value;
         setQuestions(tempQ);
     }
@@ -33,41 +38,139 @@ const GameSetting = (props) => {
      * Action of when click "Add Question"
      */
     const handleClickAddQuestion = () => {
-        setQuestions([ ...questions, {val:"",img:""} ]);
+        setQuestions([...questions, { val: "", img: "" }]);
     }
 
     /**
      * Action of when click "Start Game"
      */
     const handleClickStartGame = () => {
-        if( !questions ) return;
-        
-        console.log("questions", questions);
+        if (!questions) return;
 
-        navigate(`/admin/${gamePine}/review`);
+        const gameData = {
+            gamename: gameName,
+            gamepine: gamePine,
+            questions,
+            settings
+        }
+        API.game.saveSetting(gameData).then(() => {
+            socket.emit('start_game', { ...gameData, currRule });
+            navigate(`/admin/${gamePine}/review`);
+        }).catch(err => {
+            toast.error("Server Error!");
+        })
     }
+
+    /**
+     * handle change  event of file input
+     * @param {Event} e 
+     * @param {Number} qInd 
+     */
+    const handlePicture = (e, qInd) => {
+        const data = new FormData()
+        data.append("picture", e.target.files[0]);
+        data.append("filename", `${gamePine}-${qInd}`);
+
+        API.file.save(data).then((res) => {
+            const filedata = res.data;
+            let tempQ = [...questions];
+            tempQ[qInd]['img'] = filedata.filename;
+            setQuestions(tempQ);
+        }).catch(err => {
+            toast.error("Server Error!");
+        })
+    }
+
+    /**
+     * setting game rule 
+     *  NORMAL as N
+        SPEEDY as S
+        RELAXED as R
+        ENDLESS as E
+        CUSTOM as C
+     * @param {String} rule 
+     */
+    const ruleSelect = (rule) => {
+        setCurrRule(rule);
+        let setting = {};
+        if (rule === "N") {
+            setting = {
+                group: 10,
+                limitChars: 400,
+                writingTimer: 300,
+                votingTimer: 70
+            }
+        } else if (rule === "S") {
+            setting = {
+                group: 10,
+                limitChars: 400,
+                writingTimer: 60,
+                votingTimer: 40
+            }
+        } else if (rule === "R") {
+            setting = {
+                group: 10,
+                limitChars: 400,
+                writingTimer: 240,
+                votingTimer: 60
+            }
+        } else if (rule === "E") {
+            setting = {
+                group: 10,
+                limitChars: 400,
+                writingTimer: 0,
+                votingTimer: 0
+            }
+        } else {
+            setting = {
+                group: 10,
+                limitChars: 400,
+                writingTimer: 300,
+                votingTimer: 70
+            }
+        }
+        setSettings(setting);
+    }
+
+    /**
+     * when a student enter in game, do plus conneted user.
+     */
+    useEffect(() => {
+        // when load, getting settings and questions
+        API.game.getSetting({ gamepine: gamePine }).then((res) => {
+            setSettings(res.data.settings);
+            setQuestions(res.data.questions);
+        })
+        // when load, getting currnet users
+        socket.emit('joinGame', gamePine);
+        
+        socket.on("curr_users", ({ users }) => {
+            setCurrentusers(users);
+        })
+    }, [])
+
     return (
         <div className="h-screen w-full bg-blue-400 lg:flex justify-between">
+            <ToastContainer />
             <div className="w-full lg:w-1/3">
                 <div className="xl::px-20 lg:px-10 px-10 mt-20">
                     <div className="game-name h-40 pt-10">
-                        <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-xl bg-sky-600 font-bold py-2 px-5">{ gameName }</div>
-                        <div className="bg-slate-100 rounded-b-3xl p-6 text-center text-stone-600 text-4xl font-600">{ gamePine }</div>
+                        <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-xl bg-sky-600 font-bold py-2 px-5">{gameName}</div>
+                        <div className="bg-slate-100 rounded-b-3xl p-6 text-center text-stone-600 text-4xl font-600">{gamePine}</div>
                     </div>
                     <div className="game-users mt-20">
                         <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-full bg-sky-600 font-bold py-2 px-5">Connected User:</div>
                         <div className="bg-slate-100 rounded-b-3xl p-5 text-stone-600 pt-10">
                             <ul>
-                                <li className="p-1 text-xl bg-gradient">user1</li>
-                                <li className="p-1 text-xl bg-gradient">user2</li>
-                                <li className="p-1 text-xl bg-gradient">user3</li>
-                                <li className="p-1 text-xl bg-gradient">user3</li>
-                                <li className="p-1 text-xl bg-gradient">user5</li>
-                                <li className="p-1 text-xl bg-gradient">user3</li>
-                                <li className="p-1 text-xl bg-gradient">user3</li>
-                                <li className="p-1 text-xl bg-gradient">user3</li>
-                                <li className="p-1 text-xl bg-gradient">user3</li>
-                                <li className="p-1 text-xl bg-gradient">user10</li>
+                                {currentusers?.length > 0 &&
+                                    currentusers.map((v, i) =>
+                                        <li key={i}
+                                            onClick={() => console.log(v.socketId)}
+                                            className="p-1 text-xl bg-gradient" >{v.username}</li>)
+                                }
+                                {currentusers?.length === 0 &&
+                                    <li>No Users</li>
+                                }
                             </ul>
                         </div>
                     </div>
@@ -77,59 +180,96 @@ const GameSetting = (props) => {
                 <div className="mb-6 rounded bg-white px-6 py-4">
                     <div className="w-full flex justify-end mb-4">
                         <button
-                            onClick={ () => handleClickStartGame() }
+                            onClick={() => handleClickStartGame()}
                             className="rounded-full bg-custom font-bold text-white p-5 py-3 text-3xl">START GAME</button>
                     </div>
                     <div className="w-full flex justify-between items-center mb-4">
                         <span className="font-medium text-custom text-base font-bold">RULES</span>
-                        <button className="rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom">NORMAL</button>
-                        <button className="rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom">SPEEDY</button>
-                        <button className="rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom">RELAXED</button>
-                        <button className="rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom">ENDLESS</button>
-                        <button className="rounded-full bg-custom border border-custom p-2 px-4 font-normal text-sm text-white">CUSTOM</button>
+                        <button onClick={() => ruleSelect('N')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "N" ? "bg-custom text-white" : ""}`}>NORMAL</button>
+                        <button onClick={() => ruleSelect('S')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "S" ? "bg-custom text-white" : ""}`}>SPEEDY</button>
+                        <button onClick={() => ruleSelect('R')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "R" ? "bg-custom text-white" : ""}`}>RELAXED</button>
+                        <button onClick={() => ruleSelect('E')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "E" ? "bg-custom text-white" : ""}`}>ENDLESS</button>
+                        <button onClick={() => ruleSelect('C')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "C" ? "bg-custom text-white" : ""}`}>CUSTOM</button>
                     </div>
                     <div className="w-full flex justify-between">
                         <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
                             <FontAwesomeIcon icon="users" className="text-white text-3xl mb-2" />
                             <span className="uppercase font-normal text-white text-sm">GROUP NUMBERS</span>
-                            <div className="h-1 w-full bg-white rounded-full relative after:w-3 after:h-3 after:bg-white after:rounded-full after:left-3/5 mb-1"></div>
-                            <span className="font-medium text-white text-2xl">10</span>
+                            <div className="h-1 w-full mb-3">
+                                <Slider
+                                    min={1}
+                                    max={10}
+                                    defaultValue={settings.group}
+                                    currentValue={settings.group}
+                                    setCurrentValue={(val) => setSettings({ ...settings, group: val })}
+                                />
+                            </div>
+                            <span className="font-medium text-white text-2xl">{settings.group}</span>
                         </div>
                         <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
                             <FontAwesomeIcon icon="pen-alt" className="text-white text-3xl mb-2" />
                             <span className="uppercase font-normal text-white text-sm">Character limit</span>
-                            <div className="h-1 w-full bg-white rounded-full relative after:w-3 after:h-3 after:bg-white after:rounded-full after:left-3/5 mb-1"></div>
-                            <span className="font-medium text-white text-2xl">400</span>
+                            <div className="h-1 w-full mb-3">
+                                <Slider
+                                    min={1}
+                                    max={400}
+                                    defaultValue={settings.limitChars}
+                                    currentValue={settings.limitChars}
+                                    setCurrentValue={(val) => setSettings({ ...settings, limitChars: val })}
+                                />
+                            </div>
+                            <span className="font-medium text-white text-2xl">{settings.limitChars}</span>
                         </div>
                         <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
                             <FontAwesomeIcon icon="business-time" className="text-white text-3xl mb-2" />
                             <span className="uppercase font-normal text-white text-sm">Writing Timer</span>
-                            <div className="h-1 w-full bg-white rounded-full relative after:w-3 after:h-3 after:bg-white after:rounded-full after:left-3/5 mb-1"></div>
-                            <span className="font-medium text-white text-2xl">300</span>
+                            <div className="h-1 w-full mb-3">
+                                <Slider
+                                    min={1}
+                                    max={300}
+                                    defaultValue={settings.writingTimer}
+                                    currentValue={settings.writingTimer}
+                                    setCurrentValue={(val) => setSettings({ ...settings, writingTimer: val })}
+                                />
+                            </div>
+                            <span className="font-medium text-white text-2xl">{settings.writingTimer}</span>
                         </div>
                         <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
                             <FontAwesomeIcon icon="business-time" className="text-white text-3xl mb-2" />
                             <span className="uppercase font-normal text-white text-sm">Voting Timer</span>
-                            <div className="h-1 w-full bg-white rounded-full relative after:w-3 after:h-3 after:bg-white after:rounded-full after:left-3/5 mb-1"></div>
-                            <span className="font-medium text-white text-2xl">70</span>
+                            <div className="h-1 w-full mb-3">
+                                <Slider
+                                    min={1}
+                                    max={70}
+                                    defaultValue={settings.votingTimer}
+                                    currentValue={settings.votingTimer}
+                                    setCurrentValue={(val) => setSettings({ ...settings, votingTimer: val })}
+                                />
+                            </div>
+                            <span className="font-medium text-white text-2xl">{settings.votingTimer}</span>
                         </div>
                     </div>
                 </div>
 
-                
                 <div className="mb-4 rounded bg-white px-6 py-4 pb-20 relative">
                     {
-                        questions && questions.map((v, i)=><AddQuestion qInd={ i } question={v} handleChangeQuestion={changeQuestion} />)
+                        questions && questions.map(
+                            (v, i) => <AddQuestion key={i} qInd={i} question={v}
+                                handleChangePicture={handlePicture}
+                                handleChangeQuestion={changeQuestion} />
+                        )
                     }
 
                     <div className="absolute bottom-8 w-[95%]">
                         <div className="flex justify-between w-full">
                             <div className="border-custom border-dashed border-b-4 w-[45%]"></div>
-                            <button 
-                                onClick={ () => handleClickAddQuestion() }
-                                className="mb-2 absolute -top-3 m-auto left-0 right-0">
-                                <FontAwesomeIcon icon="plus-circle" className="text-custom text-3xl" />
-                            </button>
+                            <div className="relative">
+                                <button
+                                    onClick={() => handleClickAddQuestion()}
+                                    className="absolute -top-[12px] -left-[12px]">
+                                    <FontAwesomeIcon icon="plus-circle" className="text-custom text-3xl" />
+                                </button>
+                            </div>
                             <div className="border-custom border-dashed border-b-4 w-[45%]"></div>
                         </div>
                     </div>
