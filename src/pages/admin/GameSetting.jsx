@@ -6,12 +6,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import API from "../../provider/API.js";
 import AddQuestion from "../../components/AddQuestion";
 import Slider from "../../components/Slider";
+import localstore from "../../utils/localstore.js";
 
 const GameSetting = ({ socket }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
-    const { gameName, gamePine } = state;
+    const { gameName, gamePine } = state??{gameName:localStorage.game_name, gamePine:localStorage.game_pine};
 
     const [currentusers, setCurrentusers] = useState([]);
     const [questions, setQuestions] = useState([{ val: "", img: "" }]);
@@ -45,7 +46,9 @@ const GameSetting = ({ socket }) => {
      * Action of when click "Start Game"
      */
     const handleClickStartGame = () => {
-        if (!questions) return;
+        if (!questions || questions?.length === 0) {
+            toast.warning("Add one question at least"); return;
+        }
 
         const gameData = {
             gamename: gameName,
@@ -54,8 +57,14 @@ const GameSetting = ({ socket }) => {
             settings
         }
         API.game.saveSetting(gameData).then(() => {
-            socket.emit('start_game', { ...gameData, currRule });
-            navigate(`/admin/${gamePine}/review`);
+            const gameState = { 
+                ...gameData, 
+                currRule,
+                currQuestion: 0 
+            }
+            localstore.saveObj('game_state', gameState);
+            navigate(`/admin/${gamePine}/review` ,{ state:{ aData:gameState, role:1 } });
+            socket.emit('start_game', gameState);
         }).catch(err => {
             toast.error("Server Error!");
         })
@@ -95,21 +104,21 @@ const GameSetting = ({ socket }) => {
         let setting = {};
         if (rule === "N") {
             setting = {
-                group: 10,
+                group: 5,
                 limitChars: 400,
                 writingTimer: 300,
                 votingTimer: 70
             }
         } else if (rule === "S") {
             setting = {
-                group: 10,
+                group: 3,
                 limitChars: 400,
                 writingTimer: 60,
                 votingTimer: 40
             }
         } else if (rule === "R") {
             setting = {
-                group: 10,
+                group: 7,
                 limitChars: 400,
                 writingTimer: 240,
                 votingTimer: 60
@@ -138,13 +147,14 @@ const GameSetting = ({ socket }) => {
     useEffect(() => {
         // when load, getting settings and questions
         API.game.getSetting({ gamepine: gamePine }).then((res) => {
-            setSettings(res.data.settings);
-            setQuestions(res.data.questions);
+            res.data.settings && setSettings(res.data.settings);
+            res.data.questions && setQuestions(res.data.questions);
         })
         // when load, getting currnet users
         socket.emit('joinGame', gamePine);
         
         socket.on("curr_users", ({ users }) => {
+            // console.log('joined users', users)
             setCurrentusers(users);
         })
     }, [])
@@ -158,7 +168,7 @@ const GameSetting = ({ socket }) => {
                         <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-xl bg-sky-600 font-bold py-2 px-5">{gameName}</div>
                         <div className="bg-slate-100 rounded-b-3xl p-6 text-center text-stone-600 text-4xl font-600">{gamePine}</div>
                     </div>
-                    <div className="game-users mt-20">
+                    <div className="game-users my-20">
                         <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-full bg-sky-600 font-bold py-2 px-5">Connected User:</div>
                         <div className="bg-slate-100 rounded-b-3xl p-5 text-stone-600 pt-10">
                             <ul>
@@ -168,7 +178,7 @@ const GameSetting = ({ socket }) => {
                                             onClick={() => console.log(v.socketId)}
                                             className="p-1 text-xl bg-gradient" >{v.username}</li>)
                                 }
-                                {currentusers?.length === 0 &&
+                                {(!currentusers || currentusers?.length === 0) &&
                                     <li>No Users</li>
                                 }
                             </ul>
@@ -197,7 +207,7 @@ const GameSetting = ({ socket }) => {
                             <span className="uppercase font-normal text-white text-sm">GROUP NUMBERS</span>
                             <div className="h-1 w-full mb-3">
                                 <Slider
-                                    min={1}
+                                    min={0}
                                     max={10}
                                     defaultValue={settings.group}
                                     currentValue={settings.group}
@@ -211,7 +221,7 @@ const GameSetting = ({ socket }) => {
                             <span className="uppercase font-normal text-white text-sm">Character limit</span>
                             <div className="h-1 w-full mb-3">
                                 <Slider
-                                    min={1}
+                                    min={0}
                                     max={400}
                                     defaultValue={settings.limitChars}
                                     currentValue={settings.limitChars}

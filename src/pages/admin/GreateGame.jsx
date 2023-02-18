@@ -52,7 +52,7 @@ const CreateGame = ({socket}) => {
                                 onChange={(e) => setGamename(e.target.value)}
                                 value={gamename}
                                 type="text"
-                                className="p-1 my-2 focus:outline-none w-full"
+                                className="p-2 my-2 focus:outline-none w-full"
                                 placeholder="Test Game" />
 
                             <div className="flex justify-end mb-2">

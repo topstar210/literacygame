@@ -18,7 +18,10 @@ import fileRouter from "../routes/file.js";
 // import { decode } from './middlewares/jwt.js'
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
+}));
 
 /** Get port from environment and store in Express. */
 const port = process.env.PORT || "2087";
@@ -50,7 +53,7 @@ const server = http.createServer(app);
 global.io =  new Server(server, {
     cors: {
       origin: '*',
-      methods: ['GET', 'POST']
+      methods: ['GET', 'POST', "DELETE", "PUT"]
     }
   });
 global.io.on('connection', WebSockets.connection)

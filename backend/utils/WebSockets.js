@@ -1,39 +1,87 @@
+import game from "../controllers/game.js";
+
 let users = [];
 let _this = null;
 
 class WebSockets {
     constructor() {
-        this.users = [];
         _this = this;
     }
 
     connection(client) {
+        let  currentRoomId;
+
         // event fired when the game room is disconnected
         client.on("disconnect", () => {
             users = users.filter((user) => user.socketId !== client.id);
+            global.io.to(currentRoomId).emit('curr_users', { users });
         });
+
         // add identity of user mapped to the socket id
         client.on("identity", (room, username) => {
             users = users.filter((user) => user.socketId !== client.id);
             users.push({
                 socketId: client.id,
                 userId: client.id,
-                username
+                username,
+                roomId: room
             });
             client.join(room);
-            
-            global.io.sockets.emit('curr_users', { users });
-            // global.io.sockets.in(room).emit('curr_users', { users });
+            currentRoomId = room;
+
+            const roomUsers = users.filter((user) => user.roomId === room);
+            console.log(username, " joined the game")
+            global.io.to(room).emit('curr_users', { users: roomUsers });
         });
+
         // subscribe person to game & other user as well
         client.on("joinGame", (room, otherUserId = "") => {
             client.join(room);
-            global.io.sockets.emit('curr_users', { users });
+            currentRoomId = room;
+            const roomUsers = users.filter((user) => user.roomId === room);
+            global.io.to(room).emit('curr_users', { users: roomUsers });
         });
+
         // mute a game room
         client.on("unsubscribe", (room) => {
             client.leave(room);
         });
+
+        /**
+         * start game
+         * @param {Object} data(
+            gamename: String,
+            gamepine: String,
+            questions: Object,
+            settings: Object,
+            currRule: String,
+            currQuestion: Number 
+         * )
+         */
+        client.on("start_game", (data) => {
+            console.log('start_game  -------------- <<<< ');
+            const roomUsers = users.filter((user) => user.roomId === data.gamepine);
+            global.io.to(data.gamepine).emit('do_game', {...data, users: roomUsers});
+        })
+
+        /**
+         * get answer list
+         * @param {Object} data{
+                gamepine: String,
+         * }
+         */
+        client.on("get_answers", async (gamepine) => {
+            console.log('get_answers', gamepine)
+            global.io.to(gamepine).emit('answer_list');
+        })
+
+        /**
+         * got to leaderboard
+         */
+        client.on("goto_leaderboard",(gamepine)=>{
+            console.log('get_answers', gamepine)
+            global.io.to(gamepine).emit('goto_leaderboard');
+        })
     }
 }
 
