@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import localstore from '../../utils/localstore';
 import Answercard from '../../components/Answercard';
@@ -18,6 +19,8 @@ let voteInfo = [{
 let myVote = [1, 2, 3];
 
 const GameReview = ({ socket, role }) => {
+    let voteInterVal = null;
+    let isCountDown = false;
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
@@ -28,6 +31,7 @@ const GameReview = ({ socket, role }) => {
     const [readOnly, setReadOnly] = useState(localStorage.getItem('game_is_vote') ?? 0);
     const [groups, setGroups] = useState(1);
     const [currGroup, setCurrGroup] = useState(1);
+    const [countDownTime, setCountDownTime] = useState(0);
 
 
     /**
@@ -148,6 +152,29 @@ const GameReview = ({ socket, role }) => {
         setCurrGroup(groupInd);
     }
 
+    /**
+     * function for count down
+     * @param {Number} limitTime 
+     */
+    const countDownFuc = (limitTime) => {
+        if (limitTime <= 0) return;
+        if (isCountDown) return;
+        isCountDown = true;
+
+        let ind = 0;
+        voteInterVal = setInterval(() => {
+            const currSec = limitTime - ind;
+            localStorage.setItem("game_voting_time", currSec);
+            setCountDownTime(currSec);
+            if (currSec <= 0) {
+                clearInterval(voteInterVal);
+                handleClickReady(role);
+                return;
+            }
+            ind++;
+        }, 1000)
+    }
+
     useEffect(() => {
         if (!role) {
             socket.emit('identity', state.gamepine, state.username);
@@ -167,6 +194,8 @@ const GameReview = ({ socket, role }) => {
         const groups = utils.getTotalGroup(state.settings?.group, localstore.getObj('game_state').users ?? []);
         setGroups(groups);
 
+        countDownFuc(localStorage.getItem('game_voting_time') ?? state?.settings?.votingTimer);
+
         const gameState = localstore.getObj('game_state');
         setGameData(gameState);
         getAnswers();
@@ -176,7 +205,7 @@ const GameReview = ({ socket, role }) => {
         <div className="h-screen w-full bg-blue-400 px-16 lg:px-20">
             <ToastContainer />
             <div className="h-12 flex items-center justify-between px-5 text-white">
-                {!role ? <div className="text-xl font-bold">{state?.isFinalsVote?"Finals ":""} Vote for 3 best answers:</div> : ""}
+                {!role ? <div className="text-xl font-bold">{state?.isFinalsVote ? "Finals " : ""} Vote for 3 best answers:</div> : ""}
                 {!role && !Boolean(readOnly * 1) &&
                     <button
                         onClick={() => handleClickReady(role)}
@@ -224,6 +253,13 @@ const GameReview = ({ socket, role }) => {
                                 </span>
                                 {questions[currQuestion].val}
                             </div>
+                            {
+                                !role &&
+                                <div className="font-bold text-xl text-custom">
+                                    {countDownTime}
+                                    <FontAwesomeIcon icon="clock" className="mx-1" />
+                                </div>
+                            }
                         </div>
                     }
                     {answers.length > 0 &&

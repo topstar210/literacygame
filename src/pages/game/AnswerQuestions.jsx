@@ -24,9 +24,9 @@ const AnswerQuestions = ({ socket }) => {
     const [answer, setAnswer] = useState("");
     const [answerLen, setAnswerlen] = useState(0);
 
-    const saveReply = () => {
-        clearInterval(interVal);
-        if (answer === "") return;
+    const saveReply = (autoAnswer = null) => {
+        // console.log('saveReply');
+        if (!autoAnswer && answer === "") return;
 
         const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
         const aData = {
@@ -64,7 +64,7 @@ const AnswerQuestions = ({ socket }) => {
             setCountDownTime(currSec);
             if (currSec <= 0) {
                 clearInterval(interVal);
-                saveReply();
+                saveReply("Not answered");
                 console.log('interVal bug', interVal)
                 return;
             }

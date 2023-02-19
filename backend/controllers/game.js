@@ -58,11 +58,12 @@ export default {
         let doc;
         if(reqData.isFinalsVote) {
             let result = [];
-            for (let groupInd = 1; groupInd <= reqData.groupCnt; groupInd++) {
+            for (let groupInd = 1; groupInd <= reqData.groupCnt+1; groupInd++) {
                 const res = await Answer.find(
                     { 
                         gamepine: conditions.gamepine,
-                        quesInd: conditions.quesInd
+                        quesInd: conditions.quesInd,
+                        groupInd
                     },
                     { 'updatedAt': 0, 'createdAt': 0 }
                 ).sort({ finalsPoints: -1, createdAt: 1,  }).limit(3).exec();   
