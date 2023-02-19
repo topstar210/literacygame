@@ -6,10 +6,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import AQcomponent from "../components/AQcomponent";
 import localstore from "../../utils/localstore";
 import API from "../../provider/API";
-
-let interVal = null;
+import utils from "../../utils";
 
 const AnswerQuestions = ({ socket }) => {
+    let interVal = null;
+    let isCountDown = false;
+
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
@@ -19,35 +21,19 @@ const AnswerQuestions = ({ socket }) => {
 
     const [countDownTime, setCountDownTime] = useState(0);
     const [readonly, setReadonly] = useState(false);
-    const [ answer, setAnswer ] = useState("");
-    const [ answerLen, setAnswerlen ] = useState(0);
+    const [answer, setAnswer] = useState("");
+    const [answerLen, setAnswerlen] = useState(0);
 
     const saveReply = () => {
         clearInterval(interVal);
-        if(answer === "") return;
+        if (answer === "") return;
 
-        // calc my group ind
-        let groupInd;
-        const groupMems = gameData?.settings?.group;
-        if(groupMems > 0 ){
-            // const userLen = gameData.users.length;
-            const uInd = gameData.users.findIndex((user)=>{
-                return user.username === state.username;
-            });
-            if(uInd < 0){
-                groupInd = 1    
-            } else {
-                groupInd = Math.ceil((uInd+1) / groupMems);
-            }
-        } else {
-            groupInd = 1;
-        }
-
+        const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
         const aData = {
             ...gameData,
             quesInd: gameData.currQuestion,
             username: state.username,
-            groupInd,
+            groupInd: groupInfo.userGroupInd,
             answer
         }
         API.game.answer(aData).then((res) => {
@@ -56,9 +42,9 @@ const AnswerQuestions = ({ socket }) => {
             toast.success("Saved and Replied Successfully");
 
             setTimeout(() => {
-                navigate(`/game/${state.gamePine}/review`, { state: { aData, role:0 } });
+                navigate(`/game/${state.gamePine}/review`, { state: { ...aData, role: 0 } });
                 socket.emit("get_answers", aData?.gamepine)
-            }, 3500);
+            }, 3000);
         })
     }
 
@@ -68,6 +54,9 @@ const AnswerQuestions = ({ socket }) => {
      */
     const countDownFuc = (limitTime) => {
         if (limitTime <= 0) return;
+        if (isCountDown) return;
+        isCountDown = true;
+
         let ind = 0;
         interVal = setInterval(() => {
             const currSec = limitTime - ind;
@@ -75,8 +64,8 @@ const AnswerQuestions = ({ socket }) => {
             setCountDownTime(currSec);
             if (currSec <= 0) {
                 clearInterval(interVal);
-                console.log('interVal bug',interVal)
-                // saveReply();
+                saveReply();
+                console.log('interVal bug', interVal)
                 return;
             }
             ind++;
@@ -85,26 +74,24 @@ const AnswerQuestions = ({ socket }) => {
 
     // when load
     useEffect(() => {
-        // socket.emit('identity', state.gamePine, state.username);
+        socket.emit('identity', state.gamePine, state.username);
 
         socket.on("do_game", (data) => {
             localstore.saveObj("game_state", data);
             countDownFuc(data?.settings?.writingTimer);
             setGameData(data);
-            console.log("the game was started -----.....>.>");
+            console.log("the game was started, socket", data);
         })
 
-        const gameState = localstore.getObj("game_state");
-        if (gameState) {
-            countDownFuc(localStorage.getItem('game_writing_time'));
-            setReadonly(localStorage.getItem('game_areply_readyonly'));
-            setGameData(gameState);
-        }
+        const gameState = localstore.getObj("game_state") ?? {};
+        console.log("the game was started, reload", gameState);
+        countDownFuc(localStorage.getItem('game_writing_time'));
+        setReadonly(localStorage.getItem('game_areply_readyonly') ?? false);
+        setGameData(gameState);
     }, [])
 
     return (
         <div className="h-screen w-full bg-blue-400 px-16 lg:px-20 pt-10">
-            <ToastContainer />
             <div className="min-h-full bg-white rounded-t-3xl py-5">
                 {!gameData?.questions &&
                     <div className="loading">
@@ -131,6 +118,7 @@ const AnswerQuestions = ({ socket }) => {
                     />
                 }
             </div>
+            <ToastContainer />
         </div>
     )
 }

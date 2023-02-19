@@ -22,7 +22,7 @@ class WebSockets {
             users = users.filter((user) => user.socketId !== client.id);
             users.push({
                 socketId: client.id,
-                userId: client.id,
+                // userId: client.id,
                 username,
                 roomId: room
             });
@@ -41,6 +41,11 @@ class WebSockets {
             const roomUsers = users.filter((user) => user.roomId === room);
             global.io.to(room).emit('curr_users', { users: roomUsers });
         });
+
+        client.on('identity_admin', (gamepine)=>{
+            client.join(gamepine);
+            currentRoomId = gamepine;
+        })
 
         // mute a game room
         client.on("unsubscribe", (room) => {
@@ -72,16 +77,31 @@ class WebSockets {
          */
         client.on("get_answers", async (gamepine) => {
             console.log('get_answers', gamepine)
-            global.io.to(gamepine).emit('answer_list');
+            client.join(gamepine);
+            const roomUsers = users.filter((user) => user.roomId === gamepine);
+            global.io.to(gamepine).emit('answer_list', {users: roomUsers});
         })
 
         /**
          * got to leaderboard
          */
         client.on("goto_leaderboard",(gamepine)=>{
-            console.log('get_answers', gamepine)
+            console.log('goto_leaderboard', gamepine)
+            client.join(gamepine);
             global.io.to(gamepine).emit('goto_leaderboard');
         })
+
+        client.on("goto_next_question", (gamepine)=> {
+            console.log('goto_next_question', gamepine)
+            client.join(gamepine);
+            global.io.to(gamepine).emit('goto_next_question');
+        });
+
+        client.on("goto_finals_vote", (gamepine)=> {
+            console.log('goto_finals_vote', gamepine)
+            client.join(gamepine);
+            global.io.to(gamepine).emit('goto_finals_vote');
+        });
     }
 }
 

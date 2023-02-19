@@ -29,7 +29,7 @@ const App = () => {
           <Route path="/" element={<StartGame socket={socket} />}></Route>
           <Route path="/game/:gamepine" element={<AnswerQuestions socket={socket} />}></Route>
           <Route path="/game/:gamepine/review" element={<GameReview socket={socket} role={false} />}></Route>
-          <Route path="/game/:gamepine/leaderboard" element={<Leaderboard />}></Route>
+          <Route path="/game/:gamepine/leaderboard" element={<Leaderboard socket={socket} />}></Route>
         </Routes>
       </BrowserRouter>
     </>

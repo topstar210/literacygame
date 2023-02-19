@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useState } from 'react';
 
 const Answercard = (props) => {
-    const { ind, v, role, onBlurUsername, handleClickVote, removeAnswer } = props;
+    const { ind, v, role, onBlurUsername, handleClickVote, removeAnswer, readOnly, isFinalsVote } = props;
 
     const [username, setUsername] = useState("");
 
@@ -40,10 +40,10 @@ const Answercard = (props) => {
                 </div>
             </div>
             <div className="block text-white">
-                {role &&
+                {(role || Boolean(readOnly * 1)) &&
                     <>
-                        <div className="text-right">{v.votes ? v.votes : 0} Votes</div>
-                        <div className="text-right">{v.points ? v.points : 0} Points</div>
+                        <div className="text-right">{!isFinalsVote ? (v.votes ? v.votes : 0) : (v.finalsVotes ? v.finalsVotes : 0)} Votes</div>
+                        <div className="text-right">{!isFinalsVote ? (v.points ? v.points : 0) : (v.finalsPoints ? v.finalsPoints : 0)} Points</div>
                     </>
                 }
                 {!role &&

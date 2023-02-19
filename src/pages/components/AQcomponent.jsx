@@ -1,8 +1,18 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const AQcomponent = (props) => {
-    const { currQuestion, questions, settings, countDownTime, clickSaveReply, readonly,
-        answer, setAnswer, answerLen, setAnswerlen   } = props;
+    const { 
+        currQuestion, 
+        questions, 
+        settings, 
+        countDownTime, 
+        clickSaveReply, 
+        readonly,
+        answer, 
+        setAnswer, 
+        answerLen, 
+        setAnswerlen 
+    } = props;
 
     /**
      * action of when change answer textarea
@@ -10,7 +20,7 @@ const AQcomponent = (props) => {
      */
     const handleChangeAnswer = e => {
         let sVal = e.target.value;
-        if(sVal.length <= settings.limitChars){
+        if (sVal.length <= settings.limitChars) {
             setAnswerlen(sVal.length);
             setAnswer(sVal)
         }
@@ -35,14 +45,17 @@ const AQcomponent = (props) => {
                     <div className="w-5/6">
                         <textarea
                             value={answer}
-                            readOnly = {readonly}
                             onChange={e => handleChangeAnswer(e)}
                             className="focus:outline-none border border-custom indent-2 w-full p-2 min-h-[200px]" cols="30"></textarea>
                         <div className="flex items-center">
-                            <button
-                                onClick={() => clickSaveReply()}
-                                disabled={readonly?'disabled':false}
-                                className="uppercase bg-transparent hover:bg-sky-600 text-sky-600 font-semibold hover:text-white py-2 px-4 border border-sky-600 hover:border-transparent rounded">save reply</button>
+                            {
+                                (!readonly || readonly === 'false') &&
+                                <button
+                                    onClick={() => clickSaveReply()}
+                                    className="uppercase bg-transparent hover:bg-sky-600 text-sky-600 font-semibold hover:text-white py-2 px-4 border border-sky-600 hover:border-transparent rounded">
+                                    save reply
+                                </button>
+                            }
                             <div className="ml-5">{answerLen} / {settings.limitChars}</div>
                         </div>
                     </div>

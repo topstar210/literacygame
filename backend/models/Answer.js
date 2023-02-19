@@ -8,7 +8,9 @@ const answerSchema = new mongoose.Schema(
     username: String,
     answer: String,
     votes: { type: Number, default: 0 },
-    points: { type: Number, default: 0 }
+    points: { type: Number, default: 0 },
+    finalsVotes: { type: Number, default: 0 },
+    finalsPoints: { type: Number, default: 0 }
   },
   {
     timestamps: true,

@@ -14,6 +14,7 @@ const GameSetting = ({ socket }) => {
     const { state } = location;
     const { gameName, gamePine } = state??{gameName:localStorage.game_name, gamePine:localStorage.game_pine};
 
+    const [startLoad, setStartLoad] = useState(false);
     const [currentusers, setCurrentusers] = useState([]);
     const [questions, setQuestions] = useState([{ val: "", img: "" }]);
     const [currRule, setCurrRule] = useState('C');
@@ -49,6 +50,9 @@ const GameSetting = ({ socket }) => {
         if (!questions || questions?.length === 0) {
             toast.warning("Add one question at least"); return;
         }
+        if(currentusers.length === 0){
+            toast.warning("There is no connected users. Please share pin code."); return;
+        }
 
         const gameData = {
             gamename: gameName,
@@ -57,14 +61,18 @@ const GameSetting = ({ socket }) => {
             settings
         }
         API.game.saveSetting(gameData).then(() => {
+            setStartLoad(true);
             const gameState = { 
                 ...gameData, 
                 currRule,
-                currQuestion: 0 
+                currQuestion: 0,
+                users: currentusers
             }
             localstore.saveObj('game_state', gameState);
-            navigate(`/admin/${gamePine}/review` ,{ state:{ aData:gameState, role:1 } });
-            socket.emit('start_game', gameState);
+            setTimeout(()=>{
+                navigate(`/admin/${gamePine}/review` ,{ state:{ ...gameState, role:1 } });
+                socket.emit('start_game', gameState);
+            }, 3000)
         }).catch(err => {
             toast.error("Server Error!");
         })
@@ -161,6 +169,12 @@ const GameSetting = ({ socket }) => {
 
     return (
         <div className="h-screen w-full bg-blue-400 lg:flex justify-between">
+            {
+                startLoad && 
+                <div className="absolute top-0 left-0 w-full h-full z-30 flex justify-center items-center">
+                    <img src="/images/321.gif" width={200} alt="" />
+                </div>
+            }
             <ToastContainer />
             <div className="w-full lg:w-1/3">
                 <div className="xl::px-20 lg:px-10 px-10 mt-20">
@@ -275,6 +289,7 @@ const GameSetting = ({ socket }) => {
                             <div className="border-custom border-dashed border-b-4 w-[45%]"></div>
                             <div className="relative">
                                 <button
+                                    title="Create A Question"
                                     onClick={() => handleClickAddQuestion()}
                                     className="absolute -top-[12px] -left-[12px]">
                                     <FontAwesomeIcon icon="plus-circle" className="text-custom text-3xl" />

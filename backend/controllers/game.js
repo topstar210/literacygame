@@ -55,11 +55,32 @@ export default {
         const reqData = req.query;
         let conditions = reqData;
 
-        console.log(conditions);
-        const doc = await Answer.find(
-            conditions,
-            { 'updatedAt': 0, 'createdAt': 0 }
-        ).sort({ points: -1, createdAt: 1,  }).exec();
+        let doc;
+        if(reqData.isFinalsVote) {
+            let result = [];
+            for (let groupInd = 1; groupInd <= reqData.groupCnt; groupInd++) {
+                const res = await Answer.find(
+                    { 
+                        gamepine: conditions.gamepine,
+                        quesInd: conditions.quesInd
+                    },
+                    { 'updatedAt': 0, 'createdAt': 0 }
+                ).sort({ finalsPoints: -1, createdAt: 1,  }).limit(3).exec();   
+                result = result.concat(res);
+            }
+            doc = result;
+        } else {
+            let sortObj = {};
+            if(reqData.byFinals){
+                sortObj = { finalsPoints: -1, createdAt: 1 };
+            } else {
+                sortObj = { points: -1, createdAt: 1 };
+            }
+            doc = await Answer.find(
+                conditions,
+                { 'updatedAt': 0, 'createdAt': 0 }
+            ).sort(sortObj).exec();
+        }
         res.send(JSON.stringify(doc));
     },
 
@@ -68,11 +89,17 @@ export default {
 
         for (let i = 0; i < votes.length; i++) {
             const vote = votes[i];
-            if (vote['username']) {
-                const conditions = {'_id': req.body.answerId}
+            if (vote['answerId']) {
+                const conditions = {'_id': vote['answerId']}
+                let incObj = {};
+                if(req.body.isFinalsVote){
+                    incObj = { finalsVotes: 1, finalsPoints: vote['point'] };
+                } else {
+                    incObj = { votes: 1, points: vote['point'] };
+                }
                 Answer.updateOne(
                     conditions,
-                    { $inc: { votes: 1, points: vote['point'] } }
+                    { $inc: incObj }
                 ).exec();
             }
         }
