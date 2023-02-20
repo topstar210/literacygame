@@ -27,6 +27,9 @@ const AnswerQuestions = ({ socket }) => {
     const saveReply = (autoAnswer = null) => {
         // console.log('saveReply');
         if (!autoAnswer && answer === "") return;
+        if (autoAnswer){
+            answer = autoAnswer;
+        }
 
         const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
         const aData = {
@@ -91,34 +94,36 @@ const AnswerQuestions = ({ socket }) => {
     }, [])
 
     return (
-        <div className="h-screen w-full bg-blue-400 px-16 lg:px-20 pt-10">
-            <div className="min-h-full bg-white rounded-t-3xl py-5">
-                {!gameData?.questions &&
-                    <div className="loading">
-                        <div className="flex justify-center">
-                            <img src="/images/processing.gif" alt="" />
+        <div className="flex justify-center">
+            <div className="h-screen w-full bg-blue-400 px-5 sm:px-10 md:px-20 pt-10 max-w-[1200px] animate-fadeIn">
+                <div className="min-h-full bg-white rounded-t-3xl py-5">
+                    {!gameData?.questions &&
+                        <div className="loading">
+                            <div className="flex justify-center">
+                                <img src="/images/processing.gif" alt="" />
+                            </div>
+                            <div className="text-center text-4xl"> Waiting To Start The Game ...  </div>
                         </div>
-                        <div className="text-center text-4xl"> Waiting To Start The Game ...  </div>
-                    </div>
-                }
-                {currQuestion > -1 &&
-                    <AQcomponent
-                        socket={socket}
-                        state={state}
-                        currQuestion={currQuestion}
-                        questions={questions}
-                        settings={settings}
-                        countDownTime={countDownTime}
-                        clickSaveReply={saveReply}
-                        readonly={readonly}
-                        answer={answer}
-                        setAnswer={setAnswer}
-                        answerLen={answerLen}
-                        setAnswerlen={setAnswerlen}
-                    />
-                }
+                    }
+                    {currQuestion > -1 &&
+                        <AQcomponent
+                            socket={socket}
+                            state={state}
+                            currQuestion={currQuestion}
+                            questions={questions}
+                            settings={settings}
+                            countDownTime={countDownTime}
+                            clickSaveReply={saveReply}
+                            readonly={readonly}
+                            answer={answer}
+                            setAnswer={setAnswer}
+                            answerLen={answerLen}
+                            setAnswerlen={setAnswerlen}
+                        />
+                    }
+                </div>
+                <ToastContainer />
             </div>
-            <ToastContainer />
         </div>
     )
 }

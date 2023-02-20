@@ -12,7 +12,7 @@ const GameSetting = ({ socket }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
-    const { gameName, gamePine } = state??{gameName:localStorage.game_name, gamePine:localStorage.game_pine};
+    const { gameName, gamePine } = state ?? { gameName: localStorage.game_name, gamePine: localStorage.game_pine };
 
     const [startLoad, setStartLoad] = useState(false);
     const [currentusers, setCurrentusers] = useState([]);
@@ -50,7 +50,7 @@ const GameSetting = ({ socket }) => {
         if (!questions || questions?.length === 0) {
             toast.warning("Add one question at least"); return;
         }
-        if(currentusers.length === 0){
+        if (currentusers.length === 0) {
             toast.warning("There is no connected users. Please share pin code."); return;
         }
 
@@ -62,15 +62,15 @@ const GameSetting = ({ socket }) => {
         }
         API.game.saveSetting(gameData).then(() => {
             setStartLoad(true);
-            const gameState = { 
-                ...gameData, 
+            const gameState = {
+                ...gameData,
                 currRule,
                 currQuestion: 0,
                 users: currentusers
             }
             localstore.saveObj('game_state', gameState);
-            setTimeout(()=>{
-                navigate(`/admin/${gamePine}/review` ,{ state:{ ...gameState, role:1 } });
+            setTimeout(() => {
+                navigate(`/admin/${gamePine}/review`, { state: { ...gameState, role: 1 } });
                 socket.emit('start_game', gameState);
             }, 3000)
         }).catch(err => {
@@ -160,7 +160,7 @@ const GameSetting = ({ socket }) => {
         })
         // when load, getting currnet users
         socket.emit('joinGame', gamePine);
-        
+
         socket.on("curr_users", ({ users }) => {
             // console.log('joined users', users)
             setCurrentusers(users);
@@ -168,134 +168,136 @@ const GameSetting = ({ socket }) => {
     }, [])
 
     return (
-        <div className="h-screen w-full bg-blue-400 lg:flex justify-between">
-            {
-                startLoad && 
-                <div className="absolute top-0 left-0 w-full h-full z-30 flex justify-center items-center">
-                    <img src="/images/321.gif" width={200} alt="" />
-                </div>
-            }
-            <ToastContainer />
-            <div className="w-full lg:w-1/3">
-                <div className="xl::px-20 lg:px-10 px-10 mt-20">
-                    <div className="game-name h-40 pt-10">
-                        <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-xl bg-sky-600 font-bold py-2 px-5">{gameName}</div>
-                        <div className="bg-slate-100 rounded-b-3xl p-6 text-center text-stone-600 text-4xl font-600">{gamePine}</div>
+        <div className="flex justify-center">
+            <div className="h-screen w-full bg-blue-400 lg:flex justify-between max-w-[1200px] animate-fadeIn">
+                {
+                    startLoad &&
+                    <div className="absolute top-0 left-0 w-full h-full z-30 flex justify-center items-center">
+                        <img src="/images/321.gif" width={200} alt="" />
                     </div>
-                    <div className="game-users my-20">
-                        <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-full bg-sky-600 font-bold py-2 px-5">Connected User:</div>
-                        <div className="bg-slate-100 rounded-b-3xl p-5 text-stone-600 pt-10">
-                            <ul>
-                                {currentusers?.length > 0 &&
-                                    currentusers.map((v, i) =>
-                                        <li key={i}
-                                            onClick={() => console.log(v.socketId)}
-                                            className="p-1 text-xl bg-gradient" >{v.username}</li>)
-                                }
-                                {(!currentusers || currentusers?.length === 0) &&
-                                    <li>No Users</li>
-                                }
-                            </ul>
+                }
+                <ToastContainer />
+                <div className="w-full lg:w-1/3">
+                    <div className="xl::px-20 lg:px-10 px-10 mt-20">
+                        <div className="game-name h-40 pt-10">
+                            <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-xl bg-sky-600 font-bold py-2 px-5">{gameName}</div>
+                            <div className="bg-slate-100 rounded-b-3xl p-6 text-center text-stone-600 text-4xl font-600">{gamePine}</div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <div className="mb-6 rounded bg-white px-6 py-4">
-                    <div className="w-full flex justify-end mb-4">
-                        <button
-                            onClick={() => handleClickStartGame()}
-                            className="rounded-full bg-custom font-bold text-white p-5 py-3 text-3xl">START GAME</button>
-                    </div>
-                    <div className="w-full flex justify-between items-center mb-4">
-                        <span className="font-medium text-custom text-base font-bold">RULES</span>
-                        <button onClick={() => ruleSelect('N')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "N" ? "bg-custom text-white" : ""}`}>NORMAL</button>
-                        <button onClick={() => ruleSelect('S')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "S" ? "bg-custom text-white" : ""}`}>SPEEDY</button>
-                        <button onClick={() => ruleSelect('R')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "R" ? "bg-custom text-white" : ""}`}>RELAXED</button>
-                        <button onClick={() => ruleSelect('E')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "E" ? "bg-custom text-white" : ""}`}>ENDLESS</button>
-                        <button onClick={() => ruleSelect('C')} className={`rounded-full border border-custom p-2 px-4 font-normal text-sm text-custom ${currRule === "C" ? "bg-custom text-white" : ""}`}>CUSTOM</button>
-                    </div>
-                    <div className="w-full flex justify-between">
-                        <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
-                            <FontAwesomeIcon icon="users" className="text-white text-3xl mb-2" />
-                            <span className="uppercase font-normal text-white text-sm">GROUP NUMBERS</span>
-                            <div className="h-1 w-full mb-3">
-                                <Slider
-                                    min={0}
-                                    max={10}
-                                    defaultValue={settings.group}
-                                    currentValue={settings.group}
-                                    setCurrentValue={(val) => setSettings({ ...settings, group: val })}
-                                />
+                        <div className="game-users my-16">
+                            <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-full bg-sky-600 font-bold py-2 px-5">Connected User:</div>
+                            <div className="bg-slate-100 rounded-b-3xl p-5 text-stone-600 pt-10">
+                                <ul>
+                                    {currentusers?.length > 0 &&
+                                        currentusers.map((v, i) =>
+                                            <li key={i}
+                                                onClick={() => console.log(v.socketId)}
+                                                className="p-1 text-xl bg-gradient" >{v.username}</li>)
+                                    }
+                                    {(!currentusers || currentusers?.length === 0) &&
+                                        <li>No Users</li>
+                                    }
+                                </ul>
                             </div>
-                            <span className="font-medium text-white text-2xl">{settings.group}</span>
-                        </div>
-                        <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
-                            <FontAwesomeIcon icon="pen-alt" className="text-white text-3xl mb-2" />
-                            <span className="uppercase font-normal text-white text-sm">Character limit</span>
-                            <div className="h-1 w-full mb-3">
-                                <Slider
-                                    min={0}
-                                    max={400}
-                                    defaultValue={settings.limitChars}
-                                    currentValue={settings.limitChars}
-                                    setCurrentValue={(val) => setSettings({ ...settings, limitChars: val })}
-                                />
-                            </div>
-                            <span className="font-medium text-white text-2xl">{settings.limitChars}</span>
-                        </div>
-                        <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
-                            <FontAwesomeIcon icon="business-time" className="text-white text-3xl mb-2" />
-                            <span className="uppercase font-normal text-white text-sm">Writing Timer</span>
-                            <div className="h-1 w-full mb-3">
-                                <Slider
-                                    min={1}
-                                    max={300}
-                                    defaultValue={settings.writingTimer}
-                                    currentValue={settings.writingTimer}
-                                    setCurrentValue={(val) => setSettings({ ...settings, writingTimer: val })}
-                                />
-                            </div>
-                            <span className="font-medium text-white text-2xl">{settings.writingTimer}</span>
-                        </div>
-                        <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2">
-                            <FontAwesomeIcon icon="business-time" className="text-white text-3xl mb-2" />
-                            <span className="uppercase font-normal text-white text-sm">Voting Timer</span>
-                            <div className="h-1 w-full mb-3">
-                                <Slider
-                                    min={1}
-                                    max={70}
-                                    defaultValue={settings.votingTimer}
-                                    currentValue={settings.votingTimer}
-                                    setCurrentValue={(val) => setSettings({ ...settings, votingTimer: val })}
-                                />
-                            </div>
-                            <span className="font-medium text-white text-2xl">{settings.votingTimer}</span>
                         </div>
                     </div>
                 </div>
+                <div>
+                    <div className="mb-6 rounded bg-white px-6 py-4">
+                        <div className="w-full flex justify-end mb-4">
+                            <button
+                                onClick={() => handleClickStartGame()}
+                                className="rounded-full bg-custom font-bold text-white p-5 py-3 text-3xl">START GAME</button>
+                        </div>
+                        <div className="w-full flex flex-wrap justify-around md:justify-between items-center">
+                            <span className="font-medium text-custom text-base font-bold mb-4">RULES</span>
+                            <button onClick={() => ruleSelect('N')} className={`rounded-full border border-custom mb-4 p-2 px-4 font-normal text-sm text-custom ${currRule === "N" ? "bg-custom text-white" : ""}`}>NORMAL</button>
+                            <button onClick={() => ruleSelect('S')} className={`rounded-full border border-custom mb-4 p-2 px-4 font-normal text-sm text-custom ${currRule === "S" ? "bg-custom text-white" : ""}`}>SPEEDY</button>
+                            <button onClick={() => ruleSelect('R')} className={`rounded-full border border-custom mb-4 p-2 px-4 font-normal text-sm text-custom ${currRule === "R" ? "bg-custom text-white" : ""}`}>RELAXED</button>
+                            <button onClick={() => ruleSelect('E')} className={`rounded-full border border-custom mb-4 p-2 px-4 font-normal text-sm text-custom ${currRule === "E" ? "bg-custom text-white" : ""}`}>ENDLESS</button>
+                            <button onClick={() => ruleSelect('C')} className={`rounded-full border border-custom mb-4 p-2 px-4 font-normal text-sm text-custom ${currRule === "C" ? "bg-custom text-white" : ""}`}>CUSTOM</button>
+                        </div>
+                        <div className="w-full flex flex-wrap justify-around md:justify-between">
+                            <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2 mb-4 md:mb-0">
+                                <FontAwesomeIcon icon="users" className="text-white text-3xl mb-2" />
+                                <span className="uppercase font-normal text-white text-sm">GROUP NUMBERS</span>
+                                <div className="h-1 w-full mb-3">
+                                    <Slider
+                                        min={0}
+                                        max={10}
+                                        defaultValue={settings.group}
+                                        currentValue={settings.group}
+                                        setCurrentValue={(val) => setSettings({ ...settings, group: val })}
+                                    />
+                                </div>
+                                <span className="font-medium text-white text-2xl">{settings.group}</span>
+                            </div>
+                            <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2 mb-4 md:mb-0">
+                                <FontAwesomeIcon icon="pen-alt" className="text-white text-3xl mb-2" />
+                                <span className="uppercase font-normal text-white text-sm">Character limit</span>
+                                <div className="h-1 w-full mb-3">
+                                    <Slider
+                                        min={0}
+                                        max={400}
+                                        defaultValue={settings.limitChars}
+                                        currentValue={settings.limitChars}
+                                        setCurrentValue={(val) => setSettings({ ...settings, limitChars: val })}
+                                    />
+                                </div>
+                                <span className="font-medium text-white text-2xl">{settings.limitChars}</span>
+                            </div>
+                            <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2 mb-4 md:mb-0">
+                                <FontAwesomeIcon icon="business-time" className="text-white text-3xl mb-2" />
+                                <span className="uppercase font-normal text-white text-sm">Writing Timer</span>
+                                <div className="h-1 w-full mb-3">
+                                    <Slider
+                                        min={1}
+                                        max={300}
+                                        defaultValue={settings.writingTimer}
+                                        currentValue={settings.writingTimer}
+                                        setCurrentValue={(val) => setSettings({ ...settings, writingTimer: val })}
+                                    />
+                                </div>
+                                <span className="font-medium text-white text-2xl">{settings.writingTimer}</span>
+                            </div>
+                            <div className="w-40 rounded flex flex-col items-center bg-custom mx-2 p-2 mb-4 md:mb-0">
+                                <FontAwesomeIcon icon="business-time" className="text-white text-3xl mb-2" />
+                                <span className="uppercase font-normal text-white text-sm">Voting Timer</span>
+                                <div className="h-1 w-full mb-3">
+                                    <Slider
+                                        min={1}
+                                        max={70}
+                                        defaultValue={settings.votingTimer}
+                                        currentValue={settings.votingTimer}
+                                        setCurrentValue={(val) => setSettings({ ...settings, votingTimer: val })}
+                                    />
+                                </div>
+                                <span className="font-medium text-white text-2xl">{settings.votingTimer}</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div className="mb-4 rounded bg-white px-6 py-4 pb-20 relative">
-                    {
-                        questions && questions.map(
-                            (v, i) => <AddQuestion key={i} qInd={i} question={v}
-                                handleChangePicture={handlePicture}
-                                handleChangeQuestion={changeQuestion} />
-                        )
-                    }
+                    <div className="mb-4 rounded bg-white px-6 py-4 pb-20 relative">
+                        {
+                            questions && questions.map(
+                                (v, i) => <AddQuestion key={i} qInd={i} question={v}
+                                    handleChangePicture={handlePicture}
+                                    handleChangeQuestion={changeQuestion} />
+                            )
+                        }
 
-                    <div className="absolute bottom-8 w-[95%]">
-                        <div className="flex justify-between w-full">
-                            <div className="border-custom border-dashed border-b-4 w-[45%]"></div>
-                            <div className="relative">
-                                <button
-                                    title="Create A Question"
-                                    onClick={() => handleClickAddQuestion()}
-                                    className="absolute -top-[12px] -left-[12px]">
-                                    <FontAwesomeIcon icon="plus-circle" className="text-custom text-3xl" />
-                                </button>
+                        <div className="absolute bottom-8 w-[95%]">
+                            <div className="flex justify-between w-full">
+                                <div className="border-custom border-dashed border-b-4 w-[45%]"></div>
+                                <div className="relative">
+                                    <button
+                                        title="Create A Question"
+                                        onClick={() => handleClickAddQuestion()}
+                                        className="absolute -top-[12px] -left-[12px]">
+                                        <FontAwesomeIcon icon="plus-circle" className="text-custom text-3xl" />
+                                    </button>
+                                </div>
+                                <div className="border-custom border-dashed border-b-4 w-[45%]"></div>
                             </div>
-                            <div className="border-custom border-dashed border-b-4 w-[45%]"></div>
                         </div>
                     </div>
                 </div>

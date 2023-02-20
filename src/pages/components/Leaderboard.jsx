@@ -83,103 +83,105 @@ const Leaderboard = ({ socket }) => {
 
 
     return (
-        <div className="h-screen w-full bg-blue-400 px-5 lg:px-16 lg:px-20">
-            <div className="h-12 flex items-center justify-between px-5 text-white">
-                {role &&
-                    <>
-                        {!state?.isFinalsVote &&
-                            <select className="text-sky-600" onChange={(e) => onChangeGroups(e)} defaultValue={currGroup}>
-                                {
-                                    [...Array(groups)].map(
-                                        (v, i) =>
-                                            <option value={i + 1} key={i}>
-                                                Group {i + 1}
-                                            </option>
-                                    )
-                                }
-                            </select>
-                        }
-                        {state?.isFinalsVote &&
-                            <div className="uppercase text-xl font-bold">leaderboard</div>
-                        }
-                        <button
-                            onClick={() => completeQuestion(role)}
-                            className="bg-white text-sky-600 font-semibold px-2 rounded">
-                            {groups > 1 ? (state?.isFinalsVote ? (state?.questions.length !== (state?.currQuestion + 2) ? "Complete" : "Next Question") : "Finals Vote") : (state?.questions.length !== (state?.currQuestion + 2) ? "Complete" : "Next Question")}
-                        </button>
-                    </>
-                }
-            </div>
-            <div className="bg-white rounded-t-3xl py-5 flex justify-around">
-                {answers.length > 0 &&
-                    <div className="w-1/3 px-3 lg:px-5 flex">
-                        <div className="bg-sky-600 rounded-t-3xl pt-3">
-                            <div className="flex justify-center text-white text-3xl">
-                                {answers[0].username}
-                            </div>
-                            <div className="flex justify-center py-34">
-                                <img src="/images/winner1.png" width="80%" alt="winner 1" />
-                            </div>
-                            <div className="text-center text-white text-xl">
-                                Votes: {answers[0].votes}  &nbsp;&nbsp;
-                                Points: {answers[0].points}
+        <div className="flex justify-center">
+            <div className="h-screen w-full bg-blue-400 px-5 sm:px-10 md:px-20 max-w-[1200px] animate-fadeIn">
+                <div className="h-12 flex items-center justify-between px-5 text-white">
+                    {role &&
+                        <>
+                            {!state?.isFinalsVote &&
+                                <select className="text-sky-600" onChange={(e) => onChangeGroups(e)} defaultValue={currGroup}>
+                                    {
+                                        [...Array(groups)].map(
+                                            (v, i) =>
+                                                <option value={i + 1} key={i}>
+                                                    Group {i + 1}
+                                                </option>
+                                        )
+                                    }
+                                </select>
+                            }
+                            {state?.isFinalsVote &&
+                                <div className="uppercase text-xl font-bold">leaderboard</div>
+                            }
+                            <button
+                                onClick={() => completeQuestion(role)}
+                                className="bg-white text-sky-600 font-semibold px-2 rounded">
+                                {groups > 1 ? (state?.isFinalsVote ? (state?.questions.length !== (state?.currQuestion + 2) ? "Complete" : "Next Question") : "Finals Vote") : (state?.questions.length !== (state?.currQuestion + 2) ? "Complete" : "Next Question")}
+                            </button>
+                        </>
+                    }
+                </div>
+                <div className="bg-white rounded-t-3xl py-5 flex justify-around">
+                    {answers.length > 0 &&
+                        <div className="w-1/3 px-3 lg:px-5 flex">
+                            <div className="bg-sky-600 rounded-t-3xl pt-3">
+                                <div className="flex justify-center text-white text-3xl">
+                                    {answers[0].username}
+                                </div>
+                                <div className="flex justify-center py-34">
+                                    <img src="/images/winner1.png" width="80%" alt="winner 1" />
+                                </div>
+                                <div className="text-center text-white text-xl">
+                                    Votes: {!state?.isFinalsVote ? (answers[0].votes ? answers[0].votes : 0) : (answers[0].finalsVotes ? answers[0].finalsVotes : 0)}  &nbsp;&nbsp;
+                                    Points: {!state?.isFinalsVote ? (answers[0].points ? answers[0].points : 0) : (answers[0].finalsPoints ? answers[0].finalsPoints : 0)}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                }
+                    }
 
-                {answers.length > 1 &&
-                    <div className="w-2/3 flex flex-col">
-                        <div className="flex justify-between items-end">
-                            <div className="flex flex-col px-3 lg:px-5 w-1/2">
-                                <div className="flex justify-center text-sky-600 text-3xl my-3">
-                                    {answers[1].username}
-                                </div>
-                                <div className="bg-sky-600 rounded-t-3xl pt-5 pb-10">
-                                    <div className="flex justify-center">
-                                        <img src="/images/winner2.png" alt="winner 2" width="75%" />
-                                    </div>
-                                    <div className="text-center text-white text-xl">
-                                        Votes: {answers[1].votes}  &nbsp;&nbsp;
-                                        Points: {answers[1].points}
-                                    </div>
-                                </div>
-                            </div>
-                            {answers.length > 2 &&
-                                <div className="flex flex-col px-3 lg:px-5 mt-10 w-1/2">
+                    {answers.length > 1 &&
+                        <div className="w-2/3 flex flex-col">
+                            <div className="flex justify-between items-end">
+                                <div className="flex flex-col px-3 lg:px-5 w-1/2">
                                     <div className="flex justify-center text-sky-600 text-3xl my-3">
-                                        {answers[2].username}
+                                        {answers[1].username}
                                     </div>
-                                    <div className="bg-sky-600 rounded-t-3xl pt-5 w-full">
+                                    <div className="bg-sky-600 rounded-t-3xl pt-5 pb-10">
                                         <div className="flex justify-center">
-                                            <img src="/images/winner3.png" alt="winner 2" width="70%" />
+                                            <img src="/images/winner2.png" alt="winner 2" width="75%" />
                                         </div>
                                         <div className="text-center text-white text-xl">
-                                            Votes: {answers[2].votes}  &nbsp;&nbsp;
-                                            Points: {answers[2].points}
+                                            Votes: {!state?.isFinalsVote ? (answers[1].votes ? answers[1].votes : 0) : (answers[1].finalsVotes ? answers[1].finalsVotes : 0)}  &nbsp;&nbsp;
+                                            Points: {!state?.isFinalsVote ? (answers[1].points ? answers[1].points : 0) : (answers[1].finalsPoints ? answers[1].finalsPoints : 0)}
                                         </div>
                                     </div>
                                 </div>
+                                {answers.length > 2 &&
+                                    <div className="flex flex-col px-3 lg:px-5 mt-10 w-1/2">
+                                        <div className="flex justify-center text-sky-600 text-3xl my-3">
+                                            {answers[2].username}
+                                        </div>
+                                        <div className="bg-sky-600 rounded-t-3xl pt-5 w-full">
+                                            <div className="flex justify-center">
+                                                <img src="/images/winner3.png" alt="winner 2" width="70%" />
+                                            </div>
+                                            <div className="text-center text-white text-xl">
+                                                Votes: {!state?.isFinalsVote ? (answers[2].votes ? answers[2].votes : 0) : (answers[2].finalsVotes ? answers[2].finalsVotes : 0)}  &nbsp;&nbsp;
+                                                Points: {!state?.isFinalsVote ? (answers[2].points ? answers[2].points : 0) : (answers[2].finalsPoints ? answers[2].finalsPoints : 0)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            {answers.length > 3 &&
+                                ([...answers].splice(3, answers.length)).map((answer, i) =>
+                                    <div className="mt-4 -ml-5" key={i}>
+                                        <div className="flex justify-between p-4 rounded-full bg-sky-600 mb-4 ml-5 text-xl text-white pl-4 w-[101%]">
+                                            <div className="flex">
+                                                <div className="rounded-full p-1 h-8 w-8 bg-white text-sky-600 flex items-center justify-center mr-4">{i + 1}</div>
+                                                {answer.username}
+                                            </div>
+                                            <div className="text-white text-xl">
+                                                Votes: {!state?.isFinalsVote ? (answer.votes ? answer.votes : 0) : (answer.finalsVotes ? answer.finalsVotes : 0)}  &nbsp;&nbsp;
+                                                Points: {!state?.isFinalsVote ? (answer.points ? answer.points : 0) : (answer.finalsPoints ? answer.finalsPoints : 0)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
                             }
                         </div>
-                        {answers.length > 3 &&
-                            ([...answers].splice(3, answers.length)).map((answer, i) =>
-                                <div className="mt-4 -ml-5" key={i}>
-                                    <div className="flex justify-between p-4 rounded-full bg-sky-600 mb-4 ml-5 text-xl text-white pl-4 w-[101%]">
-                                        <div className="flex">
-                                            <div className="rounded-full p-1 h-8 w-8 bg-white text-sky-600 flex items-center justify-center mr-4">{i + 1}</div>
-                                            {answer.username}
-                                        </div>
-                                        <div className="text-white text-xl">
-                                            Votes: {answer.votes}  &nbsp;
-                                            Points: {answer.points}
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        }
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </div>
     )

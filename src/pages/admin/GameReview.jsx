@@ -202,88 +202,90 @@ const GameReview = ({ socket, role }) => {
     }, [])
 
     return (
-        <div className="h-screen w-full bg-blue-400 px-16 lg:px-20">
-            <ToastContainer />
-            <div className="h-12 flex items-center justify-between px-5 text-white">
-                {!role ? <div className="text-xl font-bold">{state?.isFinalsVote ? "Finals " : ""} Vote for 3 best answers:</div> : ""}
-                {!role && !Boolean(readOnly * 1) &&
-                    <button
-                        onClick={() => handleClickReady(role)}
-                        className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
-                        {state?.isFinalsVote ? "Done" : "Ready For Next"}
-                    </button>
-                }
-                {role && !state?.isFinalsVote &&
-                    <>
-                        <select className="text-sky-600" onChange={(e) => onChangeGroups(e)} defaultValue={currGroup}>
-                            {
-                                [...Array(groups)].map(
-                                    (v, i) =>
-                                        <option value={i + 1} key={i}>
-                                            Group {i + 1}
-                                        </option>
-                                )
-                            }
-                        </select>
+        <div className="flex justify-center">
+            <div className="h-screen w-full bg-blue-400 px-5 sm:px-10 md:px-20 max-w-[1200px] animate-fadeIn">
+                <ToastContainer />
+                <div className="h-12 flex items-center justify-between px-5 text-white">
+                    {!role ? <div className="text-xl font-bold">{state?.isFinalsVote ? "Finals " : ""} Vote for 3 best answers:</div> : ""}
+                    {!role && !Boolean(readOnly * 1) &&
                         <button
                             onClick={() => handleClickReady(role)}
                             className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
-                            Go to Leaderboard
+                            {state?.isFinalsVote ? "Done" : "Ready For Next"}
                         </button>
-                    </>
-                }
-                {role && state?.isFinalsVote &&
-                    <>
-                        <div className="text-xl font-bold">Finals Vote</div>
-                        <button
-                            onClick={() => handleClickReady(role)}
-                            className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
-                            Complete Voting
-                        </button>
-                    </>
-                }
-            </div>
-            <div className="min-h-full bg-white rounded-t-3xl py-5">
-                <div>
-                    {currQuestion > -1 &&
-                        <div className="-ml-6 flex justify-between items-center">
-                            <div className="text-white text-2xl rounded-l-full mb-4 bg-sky-600 font-bold py-2 pl-7 break-words w-11/12">
-                                <span className="uppercase mr-3">
-                                    Question {currQuestion + 1}:
-                                </span>
-                                {questions[currQuestion].val}
-                            </div>
-                            {
-                                !role &&
-                                <div className="font-bold text-xl text-custom">
-                                    {countDownTime}
-                                    <FontAwesomeIcon icon="clock" className="mx-1" />
+                    }
+                    {role && !state?.isFinalsVote &&
+                        <>
+                            <select className="text-sky-600" onChange={(e) => onChangeGroups(e)} defaultValue={currGroup}>
+                                {
+                                    [...Array(groups)].map(
+                                        (v, i) =>
+                                            <option value={i + 1} key={i}>
+                                                Group {i + 1}
+                                            </option>
+                                    )
+                                }
+                            </select>
+                            <button
+                                onClick={() => handleClickReady(role)}
+                                className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
+                                Go to Leaderboard
+                            </button>
+                        </>
+                    }
+                    {role && state?.isFinalsVote &&
+                        <>
+                            <div className="text-xl font-bold">Finals Vote</div>
+                            <button
+                                onClick={() => handleClickReady(role)}
+                                className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
+                                Complete Voting
+                            </button>
+                        </>
+                    }
+                </div>
+                <div className="min-h-full bg-white rounded-t-3xl py-5">
+                    <div>
+                        {currQuestion > -1 &&
+                            <div className="-ml-6 flex justify-between items-center">
+                                <div className="text-white text-2xl rounded-l-full mb-4 bg-sky-600 font-bold py-2 pl-7 break-words w-11/12">
+                                    <span className="uppercase mr-3">
+                                        Question {currQuestion + 1}:
+                                    </span>
+                                    {questions[currQuestion].val}
                                 </div>
-                            }
-                        </div>
-                    }
-                    {answers.length > 0 &&
-                        answers.map((v, i) =>
-                            <Answercard
-                                ind={i}
-                                key={i} v={v}
-                                role={role}
-                                readOnly={readOnly}
-                                isFinalsVote={state?.isFinalsVote}
-                                removeAnswer={removeAnswer}
-                                handleClickVote={handleClickVote}
-                                onBlurUsername={onBlurUsername} />
-                        )
-                    }
-                    {
-                        answers?.length === 0 && <div className="flex justify-center"> No Answers </div>
-                        // <div className="loading">
-                        //     <div className="flex justify-center">
-                        //         <img src="/images/processing.gif" alt="" />
-                        //     </div>
-                        //     <div className="text-center text-4xl"> Waiting Answers ...  </div>
-                        // </div>
-                    }
+                                {
+                                    !role &&
+                                    <div className="font-bold text-xl text-custom">
+                                        {countDownTime}
+                                        <FontAwesomeIcon icon="clock" className="mx-1" />
+                                    </div>
+                                }
+                            </div>
+                        }
+                        {answers.length > 0 &&
+                            answers.map((v, i) =>
+                                <Answercard
+                                    ind={i}
+                                    key={i} v={v}
+                                    role={role}
+                                    readOnly={readOnly}
+                                    isFinalsVote={state?.isFinalsVote}
+                                    removeAnswer={removeAnswer}
+                                    handleClickVote={handleClickVote}
+                                    onBlurUsername={onBlurUsername} />
+                            )
+                        }
+                        {
+                            answers?.length === 0 && <div className="flex justify-center"> No Answers </div>
+                            // <div className="loading">
+                            //     <div className="flex justify-center">
+                            //         <img src="/images/processing.gif" alt="" />
+                            //     </div>
+                            //     <div className="text-center text-4xl"> Waiting Answers ...  </div>
+                            // </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

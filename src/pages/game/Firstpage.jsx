@@ -37,7 +37,7 @@ const Firstpage = ({socket}) => {
     return (
         <div className="h-screen bg-blue-400 flex justify-center place-items-center">
             <ToastContainer />
-            <div>
+            <div className="animate-fadeIn">
                 <button
                     onClick={() => setIsShowGname(!isShowGname)}
                     className="uppercase rounded-full border-4 border-white -mt-5 px-14 py-4 text-white text-3xl font-bold">start game</button>

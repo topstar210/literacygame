@@ -2,7 +2,7 @@ const utils = {
     getGroupByUsername: (groupMems, users, username) => {
         let groupInd;
         let totalGroups;
-        if(groupMems > 0 ){
+        if(groupMems > 1 ){
             const uInd = users.findIndex((user)=>{
                 return user.username === username;
             });
@@ -23,7 +23,7 @@ const utils = {
     },
     
     getTotalGroup:(groupMems, users) => {
-        if(groupMems > 0 ) {
+        if(groupMems > 1 ) {
             return Math.ceil((users.length) / groupMems);
         } else return 1;
     }
