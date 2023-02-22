@@ -9,9 +9,6 @@ import API from "../../provider/API";
 import utils from "../../utils";
 
 const AnswerQuestions = ({ socket }) => {
-    let interVal = null;
-    let isCountDown = false;
-
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
@@ -19,19 +16,17 @@ const AnswerQuestions = ({ socket }) => {
     const [gameData, setGameData] = useState({});
     const { currQuestion, questions, settings } = gameData;
 
-    const [countDownTime, setCountDownTime] = useState(0);
     const [readonly, setReadonly] = useState(false);
     const [answer, setAnswer] = useState("");
     const [answerLen, setAnswerlen] = useState(0);
+    const [writingTimer, setWritingTimer] = useState(0);
 
-    const saveReply = (autoAnswer = null) => {
-        // console.log('saveReply');
-        if (!autoAnswer && answer === "") return;
-        if (autoAnswer){
-            answer = autoAnswer;
-        }
+    const saveReply = () => {
+        utils.clearInvervalVals();
+        if (answer === "") return;
 
         const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
+        console.log(gameData?.settings?.group, gameData.users, state.username, groupInfo);
         const aData = {
             ...gameData,
             quesInd: gameData.currQuestion,
@@ -43,54 +38,57 @@ const AnswerQuestions = ({ socket }) => {
             setReadonly(true);
             localStorage.setItem('game_areply_readyonly', true);
             toast.success("Saved and Replied Successfully");
-
             setTimeout(() => {
-                navigate(`/game/${state.gamePine}/review`, { state: { ...aData, role: 0 } });
-                socket.emit("get_answers", aData?.gamepine)
+                socket.emit("get_answers", state?.gamepine, 1);
             }, 3000);
         })
     }
 
-    /**
-     * function for count down
-     * @param {Number} limitTime 
-     */
-    const countDownFuc = (limitTime) => {
-        if (limitTime <= 0) return;
-        if (isCountDown) return;
-        isCountDown = true;
+    useEffect(() => {
+        const interval = setTimeout(() => {
+            if(writingTimer > 0){
+                const leftTime = writingTimer*1 - 1;
+                // console.log("left writing time is ", leftTime);
 
-        let ind = 0;
-        interVal = setInterval(() => {
-            const currSec = limitTime - ind;
-            localStorage.setItem("game_writing_time", currSec);
-            setCountDownTime(currSec);
-            if (currSec <= 0) {
-                clearInterval(interVal);
-                saveReply("Not answered");
-                console.log('interVal bug', interVal)
-                return;
+                setWritingTimer(leftTime);
+                localStorage.setItem("game_writing_time", leftTime);
+                if(leftTime <= 0){
+                    saveReply();
+                }
             }
-            ind++;
-        }, 1000)
-    }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [writingTimer]);
 
     // when load
     useEffect(() => {
-        socket.emit('identity', state.gamePine, state.username);
+        socket.emit('identity', state.gamepine, state.username);
 
-        socket.on("do_game", (data) => {
+        socket.on("start_game", (data) => {
+            // console.log("start_game", data);
             localstore.saveObj("game_state", data);
-            countDownFuc(data?.settings?.writingTimer);
             setGameData(data);
-            console.log("the game was started, socket", data);
+            socket.emit("get_answers", state?.gamepine);
+
+            setWritingTimer(data.settings.writingTimer);
+        })
+
+        socket.on("start_vote", () => {
+            const gameData = localstore.getObj("game_state") ?? {};
+            const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
+            navigate(`/game/${state.gamepine}/review`, { state: { ...state, ...gameData, groupInd: groupInfo.userGroupInd, nowVoting: true, role: 0 } });
         })
 
         const gameState = localstore.getObj("game_state") ?? {};
-        console.log("the game was started, reload", gameState);
-        countDownFuc(localStorage.getItem('game_writing_time'));
-        setReadonly(localStorage.getItem('game_areply_readyonly') ?? false);
-        setGameData(gameState);
+        if (gameState) {
+            // console.log("gameState", gameState)
+            setReadonly(localStorage.getItem('game_areply_readyonly') ?? false);
+            setGameData(gameState);
+        }
+
+        const timer = localStorage.getItem("game_writing_time");
+        setWritingTimer(timer ? timer*1 : state?.settings?.writingTimer); // when reload, writing timeing
     }, [])
 
     return (
@@ -112,7 +110,7 @@ const AnswerQuestions = ({ socket }) => {
                             currQuestion={currQuestion}
                             questions={questions}
                             settings={settings}
-                            countDownTime={countDownTime}
+                            countDownTime={writingTimer}
                             clickSaveReply={saveReply}
                             readonly={readonly}
                             answer={answer}

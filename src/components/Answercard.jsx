@@ -13,7 +13,7 @@ const Answercard = (props) => {
     return (
         <div
             onClick={e => handleClickVote(v, ind)}
-            className="flex justify-between items-center ml-10 p-3 mb-4 border-l-[8px] border-custom bg-sky-600 rounded-tr-3xl relative">
+            className="flex justify-between items-center ml-10 p-3 mb-4 border-l-[8px] border-custom bg-sky-600 rounded-tr-3xl relative text-xl">
 
             {role &&
                 <button
@@ -22,25 +22,26 @@ const Answercard = (props) => {
                     <FontAwesomeIcon icon="remove" className="text-sm text-white" />
                 </button>
             }
-            <div className="answer w-5/6 break-words">
+            <div className="answer w-5/6 break-words text-custom">
                 {v.answer}
                 <div className="flex text-white mt-2">
                     <div className="">
-                        <FontAwesomeIcon icon="user" className="" />
-                        {role ?
-                            <input
-                                type="text"
-                                value={username}
-                                onBlur={e => onBlurUsername(e, v._id)}
-                                onChange={e => setUsername(e.target.value)}
-                                className="bg-transparent" />
-                            : v.username
+                        {role &&
+                            <>
+                                <FontAwesomeIcon icon="user" className="" />
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onBlur={e => onBlurUsername(e, v._id)}
+                                    onChange={e => setUsername(e.target.value)}
+                                    className="bg-transparent" />
+                            </>
                         }
                     </div>
                 </div>
             </div>
             <div className="block text-white">
-                {(role || Boolean(readOnly * 1)) &&
+                {role &&
                     <>
                         <div className="text-right">{!isFinalsVote ? (v.votes ? v.votes : 0) : (v.finalsVotes ? v.finalsVotes : 0)} Votes</div>
                         <div className="text-right">{!isFinalsVote ? (v.points ? v.points : 0) : (v.finalsPoints ? v.finalsPoints : 0)} Points</div>

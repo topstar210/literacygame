@@ -12,7 +12,7 @@ const GameSetting = ({ socket }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
-    const { gameName, gamePine } = state ?? { gameName: localStorage.game_name, gamePine: localStorage.game_pine };
+    const { gamename, gamepine } = state ?? { gamename: localStorage.game_name, gamepine: localStorage.game_pine };
 
     const [startLoad, setStartLoad] = useState(false);
     const [currentusers, setCurrentusers] = useState([]);
@@ -55,8 +55,8 @@ const GameSetting = ({ socket }) => {
         }
 
         const gameData = {
-            gamename: gameName,
-            gamepine: gamePine,
+            gamename: gamename,
+            gamepine: gamepine,
             questions,
             settings
         }
@@ -70,7 +70,7 @@ const GameSetting = ({ socket }) => {
             }
             localstore.saveObj('game_state', gameState);
             setTimeout(() => {
-                navigate(`/admin/${gamePine}/review`, { state: { ...gameState, role: 1 } });
+                navigate(`/admin/${gamepine}/review`, { state: { ...gameState, role: 1 } });
                 socket.emit('start_game', gameState);
             }, 3000)
         }).catch(err => {
@@ -86,7 +86,7 @@ const GameSetting = ({ socket }) => {
     const handlePicture = (e, qInd) => {
         const data = new FormData()
         data.append("picture", e.target.files[0]);
-        data.append("filename", `${gamePine}-${qInd}`);
+        data.append("filename", `${gamepine}-${qInd}`);
 
         API.file.save(data).then((res) => {
             const filedata = res.data;
@@ -154,12 +154,12 @@ const GameSetting = ({ socket }) => {
      */
     useEffect(() => {
         // when load, getting settings and questions
-        API.game.getSetting({ gamepine: gamePine }).then((res) => {
+        API.game.getSetting({ gamepine: gamepine }).then((res) => {
             res.data.settings && setSettings(res.data.settings);
             res.data.questions && setQuestions(res.data.questions);
         })
         // when load, getting currnet users
-        socket.emit('joinGame', gamePine);
+        socket.emit('joinGame', gamepine);
 
         socket.on("curr_users", ({ users }) => {
             // console.log('joined users', users)
@@ -180,8 +180,8 @@ const GameSetting = ({ socket }) => {
                 <div className="w-full lg:w-1/3">
                     <div className="xl::px-20 lg:px-10 px-10 mt-20">
                         <div className="game-name h-40 pt-10">
-                            <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-xl bg-sky-600 font-bold py-2 px-5">{gameName}</div>
-                            <div className="bg-slate-100 rounded-b-3xl p-6 text-center text-stone-600 text-4xl font-600">{gamePine}</div>
+                            <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-xl bg-sky-600 font-bold py-2 px-5">{gamename}</div>
+                            <div className="bg-slate-100 rounded-b-3xl p-6 text-center text-stone-600 text-4xl font-600">{gamepine}</div>
                         </div>
                         <div className="game-users my-16">
                             <div className="absolute -mt-5 -ml-5 uppercase text-white text-2xl rounded-full bg-sky-600 font-bold py-2 px-5">Connected User:</div>

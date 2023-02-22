@@ -66,7 +66,7 @@ class WebSockets {
         client.on("start_game", (data) => {
             console.log('start_game  -------------- <<<< ');
             const roomUsers = users.filter((user) => user.roomId === data.gamepine);
-            global.io.to(data.gamepine).emit('do_game', {...data, users: roomUsers});
+            global.io.to(data.gamepine).emit('start_game', {...data, users: roomUsers});
         })
 
         /**
@@ -75,11 +75,10 @@ class WebSockets {
                 gamepine: String,
          * }
          */
-        client.on("get_answers", async (gamepine) => {
+        client.on("get_answers", async (gamepine, to_admin) => {
             console.log('get_answers', gamepine)
             client.join(gamepine);
-            const roomUsers = users.filter((user) => user.roomId === gamepine);
-            global.io.to(gamepine).emit('answer_list', {users: roomUsers});
+            global.io.to(gamepine).emit('get_answers', to_admin);
         })
 
         /**
@@ -102,6 +101,11 @@ class WebSockets {
             client.join(gamepine);
             global.io.to(gamepine).emit('goto_finals_vote');
         });
+
+        client.on("start_vote", (gamepine)=>{
+            console.log('start_vote', gamepine)
+            global.io.to(gamepine).emit('start_vote');
+        })
     }
 }
 

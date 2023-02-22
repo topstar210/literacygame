@@ -7,8 +7,8 @@ import API from "../../provider/API.js";
 const Firstpage = ({socket}) => {
     const navigate = useNavigate();
     const [isShowGname, setIsShowGname] = useState(false);
-    const [pineCode, setPineCode] = useState();
-    const [username, setUsername] = useState();
+    const [pineCode, setPineCode] = useState("");
+    const [username, setUsername] = useState("");
 
     /**
      * Action of when click button named "Start Game"
@@ -22,7 +22,7 @@ const Firstpage = ({socket}) => {
             } else {
                 socket.emit('identity', pineCode, username);
                 navigate(`/game/${pineCode}`, {
-                    state: { gamePine: pineCode, username }
+                    state: { gamepine: pineCode, username }
                 });
             }
         }).catch(err => {

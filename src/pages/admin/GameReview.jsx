@@ -19,8 +19,6 @@ let voteInfo = [{
 let myVote = [1, 2, 3];
 
 const GameReview = ({ socket, role }) => {
-    let voteInterVal = null;
-    let isCountDown = false;
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
@@ -30,9 +28,9 @@ const GameReview = ({ socket, role }) => {
     const [answers, setAnswers] = useState([]);
     const [readOnly, setReadOnly] = useState(localStorage.getItem('game_is_vote') ?? 0);
     const [groups, setGroups] = useState(1);
-    const [currGroup, setCurrGroup] = useState(1);
-    const [countDownTime, setCountDownTime] = useState(0);
-
+    const [currGroup, setCurrGroup] = useState(-1);
+    const [writingTimer, setWritingTimer] = useState(0);
+    const [votingTimer, setVotingTimer] = useState(0);
 
     /**
      * handle click answer to vote the answer
@@ -55,7 +53,6 @@ const GameReview = ({ socket, role }) => {
             myVote = myVote.sort();
             vote = myVote[0];
             myVote.splice(0, 1);
-            console.log('vote', vote);
             voteInfo[vote * 1 - 1].answerId = answer?._id;
         } else {
             myVote.push(answer?.myVote);
@@ -82,6 +79,10 @@ const GameReview = ({ socket, role }) => {
             isFinalsVote: state?.isFinalsVote,
             groupCnt: groups
         }).then((res) => {
+            // console.log(res.data.length, state.users.length)
+            // if (role && res.data.length >= state.users.length) {
+            //     startVoting();
+            // }
             setAnswers(res.data);
         })
     }
@@ -91,6 +92,7 @@ const GameReview = ({ socket, role }) => {
      * @param {Number} role 1: admin, 0: user
      */
     const handleClickReady = (role) => {
+        utils.clearInvervalVals();
         if (!role) {
             if (readOnly * 1) return;
 
@@ -107,9 +109,27 @@ const GameReview = ({ socket, role }) => {
                 socket.emit("get_answers", state?.gamepine);
             })
         } else {
-            socket.emit("goto_leaderboard", state?.gamepine);
+            if (!state?.nowVoting) {
+                startVoting();
+            } else {
+                setWritingTimer(0);
+                setVotingTimer(0);
+                localStorage.removeItem("game_writing_time");
+                localStorage.removeItem("game_voting_time");
+                socket.emit("goto_leaderboard", state?.gamepine);
+            }
         }
     }
+
+    const startVoting = () => {
+        setWritingTimer(0);
+        setVotingTimer(0);
+        localStorage.removeItem("game_writing_time");
+        localStorage.removeItem("game_voting_time");
+        navigate(`/admin/${state?.gamepine}/review?voting`, { state: { ...state, role: role, nowVoting: true } });
+        socket.emit('start_vote', state?.gamepine);
+    }
+
     /**
      * changing username
      * @param {Event} e 
@@ -148,33 +168,55 @@ const GameReview = ({ socket, role }) => {
      */
     const onChangeGroups = e => {
         const groupInd = e.target.value;
-        getAnswers(groupInd);
+        getAnswers(groupInd < 0 ? null : groupInd);
         setCurrGroup(groupInd);
     }
 
-    /**
-     * function for count down
-     * @param {Number} limitTime 
-     */
-    const countDownFuc = (limitTime) => {
-        if (limitTime <= 0) return;
-        if (isCountDown) return;
-        isCountDown = true;
+    // when admin, display writing time
+    useEffect(() => {
+        if (!role) return;
+        const interval = setTimeout(() => {
+            if (writingTimer > 0) {
+                const leftTime = writingTimer * 1 - 1;
+                // console.log("left writing time is ", leftTime);
 
-        let ind = 0;
-        voteInterVal = setInterval(() => {
-            const currSec = limitTime - ind;
-            localStorage.setItem("game_voting_time", currSec);
-            setCountDownTime(currSec);
-            if (currSec <= 0) {
-                clearInterval(voteInterVal);
-                handleClickReady(role);
-                return;
+                setWritingTimer(leftTime);
+                localStorage.setItem("game_writing_time", leftTime);
             }
-            ind++;
-        }, 1000)
-    }
+        }, 1000);
 
+        return () => clearInterval(interval);
+    }, [writingTimer]);
+
+    // voting timer
+    useEffect(() => {
+        const interval = setTimeout(() => {
+            if (votingTimer > 0) {
+                const leftTime = votingTimer * 1 - 1;
+                // console.log("left voting time is ", leftTime);
+
+                setVotingTimer(leftTime);
+                localStorage.setItem("game_voting_time", leftTime);
+                if (!role && leftTime <= 0) {
+                    handleClickReady(role);
+                }
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [votingTimer]);
+
+    useEffect(() => {
+        if (state?.nowVoting) {
+            const timer = localStorage.getItem("game_voting_time");
+            setVotingTimer(timer ? timer * 1 : state?.settings.votingTimer); // when reload, voting timeing
+        } else {
+            const timer = localStorage.getItem("game_writing_time");
+            setWritingTimer(timer ? timer * 1 : state?.settings.writingTimer); // when reload, writing timeing
+        }
+    }, [state?.nowVoting])
+
+    // when load
     useEffect(() => {
         if (!role) {
             socket.emit('identity', state.gamepine, state.username);
@@ -182,7 +224,8 @@ const GameReview = ({ socket, role }) => {
             socket.emit('identity_admin', state.gamepine)
         }
 
-        socket.on("answer_list", ({ users }) => {
+        socket.on("get_answers", (to_admin) => {
+            if (to_admin && !role) return;
             getAnswers();
         })
 
@@ -194,29 +237,31 @@ const GameReview = ({ socket, role }) => {
         const groups = utils.getTotalGroup(state.settings?.group, localstore.getObj('game_state').users ?? []);
         setGroups(groups);
 
-        countDownFuc(localStorage.getItem('game_voting_time') ?? state?.settings?.votingTimer);
-
         const gameState = localstore.getObj('game_state');
         setGameData(gameState);
-        getAnswers();
+        if(!role && !state?.isFinalsVote){
+            console.log(state?.groupInd)
+            getAnswers(state?.groupInd);
+        } else getAnswers();
     }, [])
 
     return (
         <div className="flex justify-center">
             <div className="h-screen w-full bg-blue-400 px-5 sm:px-10 md:px-20 max-w-[1200px] animate-fadeIn">
                 <ToastContainer />
-                <div className="h-12 flex items-center justify-between px-5 text-white">
+                <div className="flex flex-wrap py-3 items-center justify-between px-5 text-white">
                     {!role ? <div className="text-xl font-bold">{state?.isFinalsVote ? "Finals " : ""} Vote for 3 best answers:</div> : ""}
                     {!role && !Boolean(readOnly * 1) &&
                         <button
                             onClick={() => handleClickReady(role)}
-                            className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
+                            className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl">
                             {state?.isFinalsVote ? "Done" : "Ready For Next"}
                         </button>
                     }
                     {role && !state?.isFinalsVote &&
                         <>
                             <select className="text-sky-600" onChange={(e) => onChangeGroups(e)} defaultValue={currGroup}>
+                                <option value={-1}>All</option>
                                 {
                                     [...Array(groups)].map(
                                         (v, i) =>
@@ -228,8 +273,8 @@ const GameReview = ({ socket, role }) => {
                             </select>
                             <button
                                 onClick={() => handleClickReady(role)}
-                                className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
-                                Go to Leaderboard
+                                className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl">
+                                {state?.nowVoting ? "Go to Leaderboard" : "Start Voting"}
                             </button>
                         </>
                     }
@@ -238,7 +283,7 @@ const GameReview = ({ socket, role }) => {
                             <div className="text-xl font-bold">Finals Vote</div>
                             <button
                                 onClick={() => handleClickReady(role)}
-                                className="bg-white text-sky-600 font-semibold px-2 border hover:border-transparent rounded">
+                                className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl">
                                 Complete Voting
                             </button>
                         </>
@@ -248,19 +293,16 @@ const GameReview = ({ socket, role }) => {
                     <div>
                         {currQuestion > -1 &&
                             <div className="-ml-6 flex justify-between items-center">
-                                <div className="text-white text-2xl rounded-l-full mb-4 bg-sky-600 font-bold py-2 pl-7 break-words w-11/12">
+                                <div className="text-white text-2xl rounded-l-full mb-5 bg-sky-600 font-bold py-2 pl-7 break-words w-11/12">
                                     <span className="uppercase mr-3">
                                         Question {currQuestion + 1}:
                                     </span>
                                     {questions[currQuestion].val}
                                 </div>
-                                {
-                                    !role &&
-                                    <div className="font-bold text-xl text-custom">
-                                        {countDownTime}
-                                        <FontAwesomeIcon icon="clock" className="mx-1" />
-                                    </div>
-                                }
+                                <div className="font-bold text-xl text-custom">
+                                    {state?.nowVoting ? votingTimer : writingTimer}
+                                    <FontAwesomeIcon icon="clock" className="mx-1" />
+                                </div>
                             </div>
                         }
                         {answers.length > 0 &&
@@ -277,7 +319,7 @@ const GameReview = ({ socket, role }) => {
                             )
                         }
                         {
-                            answers?.length === 0 && <div className="flex justify-center"> No Answers </div>
+                            answers?.length === 0 && <div className="flex justify-center text-2xl"> No Answers </div>
                             // <div className="loading">
                             //     <div className="flex justify-center">
                             //         <img src="/images/processing.gif" alt="" />
