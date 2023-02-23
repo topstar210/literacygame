@@ -1,6 +1,6 @@
 const config = {
     db: {
-        url: 'localhost:27017',
+        url: '127.0.0.1:27017',
         name: 'storiesgamedb'
     }
 }
