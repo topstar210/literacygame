@@ -14,7 +14,7 @@ import Leaderboard from "./pages/components/Leaderboard";
 
 library.add(faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove);
 
-const socket = io(process.env.REACT_APP_SERVERURL);
+const socket = io(process.env.REACT_APP_SOCKETURL);
 
 const App = () => {
   
