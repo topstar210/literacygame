@@ -33,10 +33,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-app.use("/", indexRouter);
-app.use("/users", userRouter);
-app.use("/game", gameRouter);
-app.use("/file", fileRouter)
+app.use("/api/", indexRouter);
+app.use("/api/users", userRouter);
+app.use("/api/game", gameRouter);
+app.use("/api/file", fileRouter)
 
 /** catch 404 and forward to error handler */
 app.use('*', (req, res) => {
