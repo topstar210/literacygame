@@ -1,4 +1,6 @@
 import http from "http";
+import https from "https";
+import fs from "fs";
 import express from "express";
 import logger from "morgan";
 import cors from "cors";
@@ -18,10 +20,7 @@ import fileRouter from "../routes/file.js";
 // import { decode } from './middlewares/jwt.js'
 
 const app = express();
-app.use(cors({
-    origin: '*',
-    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
-}));
+app.use(cors());
 
 /** Get port from environment and store in Express. */
 const port = process.env.PORT || "2087";
@@ -47,13 +46,28 @@ app.use('*', (req, res) => {
   })
 });
 
-/** Create HTTP server. */
-const server = http.createServer(app);
+let server = null;
+if(process.env.ISHTTP){
+  const privateKey  = fs.readFileSync('/etc/letsencrypt/live/mindbuild.org/privkey.pem', 'utf8');
+  const certificate = fs.readFileSync('/etc/letsencrypt/live/mindbuild.org/fullchain.pem', 'utf8');
+  
+  const credentials = {key: privateKey, cert: certificate};
+
+  /** Create HTTPS server. */
+  server = http.createServer(credentials, app);
+} else {
+
+  /** Create HTTP server. */
+  server = http.createServer(app);
+}
+
+
 /** Create socket connection */
 global.io =  new Server(server, {
     cors: {
       origin: '*',
-      methods: ['GET', 'POST', "DELETE", "PUT"]
+      methods: ['GET', 'POST', "DELETE", "PUT"],
+      credentials: true
     }
   });
 global.io.on('connection', WebSockets.connection)
@@ -62,5 +76,5 @@ global.io.on('connection', WebSockets.connection)
 server.listen(port);
 /** Event listener for HTTP server "listening" event. */
 server.on("listening", () => {
-  console.log(`Listening on port:: http://localhost:${port}/`)
+  console.log(`Listening on port:: ${port}`)
 });
