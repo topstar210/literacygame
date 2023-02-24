@@ -66,7 +66,7 @@ if(process.env.ISHTTP){
 /** Create socket connection */
 global.io =  new Server(server, {
     cors: {
-      origin: '*',
+      origin: ['https://mindbuild.org/', 'http://localhost:3001/'],
       methods: ['GET', 'POST', "DELETE", "PUT"],
       credentials: true
     }
