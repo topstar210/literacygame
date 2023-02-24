@@ -47,6 +47,7 @@ app.use('*', (req, res) => {
 });
 
 let server = null;
+
 if(process.env.ISHTTP){
   const privateKey  = fs.readFileSync('/etc/letsencrypt/live/mindbuild.org/privkey.pem', 'utf8');
   const certificate = fs.readFileSync('/etc/letsencrypt/live/mindbuild.org/fullchain.pem', 'utf8');
@@ -54,7 +55,7 @@ if(process.env.ISHTTP){
   const credentials = {key: privateKey, cert: certificate};
 
   /** Create HTTPS server. */
-  server = http.createServer(credentials, app);
+  server = https.createServer(credentials, app);
 } else {
 
   /** Create HTTP server. */
