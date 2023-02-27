@@ -51,7 +51,7 @@ const GameSetting = ({ socket }) => {
             toast.warning("Add one question at least"); return;
         }
         if (currentusers.length === 0) {
-            toast.warning("There is no connected users. Please share pin code."); return;
+            toast.warning("There are no connected users, at least one user is required to start the game."); return;
         }
 
         const gameData = {

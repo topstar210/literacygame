@@ -18,7 +18,7 @@ const AddQuestion = (props) => {
                     value={question.val}
                     onChange={(e) => handleChangeQuestion(e, qInd)}
                     className="focus:outline-none w-full"
-                    placeholder="This is the propmpt that the students will see." ></textarea>
+                    placeholder="This is the prompt that the students will answer. Add your question or activity here." ></textarea>
             </div>
             <div>
                 <img onClick={ ()=>handleClickPicture() } width="235" src={question.img===""?`/images/defualt_img.png`:`${process.env.REACT_APP_SERVERURL}${question.img}`} alt="DF" />

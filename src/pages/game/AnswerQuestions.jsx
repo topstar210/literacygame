@@ -37,7 +37,7 @@ const AnswerQuestions = ({ socket }) => {
         API.game.answer(aData).then((res) => {
             setReadonly(true);
             localStorage.setItem('game_areply_readyonly', true);
-            toast.success("Saved and Replied Successfully");
+            toast.success("Saved and Sent!");
             setTimeout(() => {
                 socket.emit("get_answers", state?.gamepine, 1);
             }, 3000);
@@ -100,7 +100,7 @@ const AnswerQuestions = ({ socket }) => {
                             <div className="flex justify-center">
                                 <img src="/images/processing.gif" alt="" />
                             </div>
-                            <div className="text-center text-4xl"> Waiting To Start The Game ...  </div>
+                            <div className="text-center text-4xl"> Please wait for the game to start...  </div>
                         </div>
                     }
                     {currQuestion > -1 &&

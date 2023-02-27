@@ -14,11 +14,11 @@ const Firstpage = ({socket}) => {
      * Action of when click button named "Start Game"
      */
     const clickStartGame = () => {
-        if(!username) toast.warning("Full Name is Required Fields")
-        if(!pineCode) toast.warning("Game Pine is Required Fields")
+        if(!username) toast.warning("Name is Required Fields")
+        if(!pineCode) toast.warning("Enter Valid Game Pin")
         API.game.checkpine({pineCode, username}).then((res)=>{
             if(res.data === "dont_exist_game"){
-                toast.warning("Game Pine is not exist. Please use another pine code");return;
+                toast.warning("Game pin does not exist. Please use another game pin");return;
             } else {
                 socket.emit('identity', pineCode, username);
                 navigate(`/game/${pineCode}`, {
@@ -49,13 +49,13 @@ const Firstpage = ({socket}) => {
                                 onChange={e => setPineCode(e.target.value)}
                                 value={pineCode}
                                 className="p-1 my-2 focus:outline-none w-full"
-                                placeholder="Game Pine" />
+                                placeholder="Game Pin" />
                             <input
                                 type="text"
                                 onChange={e => setUsername(e.target.value)}
                                 value={username}
                                 className="p-1 my-2 focus:outline-none w-full"
-                                placeholder="Your Full Name" />
+                                placeholder="Your Name" />
                             <div className="flex justify-end mb-2">
                                 <button
                                     onClick={() => clickStartGame()}

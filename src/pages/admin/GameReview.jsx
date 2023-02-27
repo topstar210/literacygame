@@ -39,7 +39,7 @@ const GameReview = ({ socket, role }) => {
      */
     const handleClickVote = (answer, ind) => {
         if (readOnly * 1 === 1) {
-            toast.warning('Voting finished... Please wait to next round.');
+            toast.warning('Voting has finished... Please wait for the next round.');
             return;
         }
 
@@ -255,7 +255,7 @@ const GameReview = ({ socket, role }) => {
                         <button
                             onClick={() => handleClickReady(role)}
                             className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl">
-                            {state?.isFinalsVote ? "Done" : "Ready For Next"}
+                            {state?.isFinalsVote ? "Done" : "Submit!"}
                         </button>
                     }
                     {role && !state?.isFinalsVote &&
@@ -274,7 +274,7 @@ const GameReview = ({ socket, role }) => {
                             <button
                                 onClick={() => handleClickReady(role)}
                                 className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl">
-                                {state?.nowVoting ? "Go to Leaderboard" : "Start Voting"}
+                                {state?.nowVoting ? "Show Leaderboard" : "Start Voting"}
                             </button>
                         </>
                     }
