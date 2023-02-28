@@ -17,6 +17,7 @@ let voteInfo = [{
     point: 10, answerId: ""
 }];
 let myVote = [1, 2, 3];
+let voteUsers = [];
 
 const GameReview = ({ socket, role }) => {
     const navigate = useNavigate();
@@ -79,10 +80,6 @@ const GameReview = ({ socket, role }) => {
             isFinalsVote: state?.isFinalsVote,
             groupCnt: groups
         }).then((res) => {
-            // console.log(res.data.length, state.users.length)
-            // if (role && res.data.length >= state.users.length) {
-            //     startVoting();
-            // }
             setAnswers(res.data);
         })
     }
@@ -106,19 +103,23 @@ const GameReview = ({ socket, role }) => {
             }).then((res) => {
                 setReadOnly(true)
                 localStorage.setItem("game_is_vote", 1);
-                socket.emit("get_answers", state?.gamepine);
+                socket.emit("get_answers", state?.gamepine, state.username);
             })
         } else {
             if (!state?.nowVoting) {
                 startVoting();
             } else {
-                setWritingTimer(0);
-                setVotingTimer(0);
-                localStorage.removeItem("game_writing_time");
-                localStorage.removeItem("game_voting_time");
-                socket.emit("goto_leaderboard", state?.gamepine);
+                gotoLeaderboard();
             }
         }
+    }
+
+    const gotoLeaderboard = () => {
+        setWritingTimer(0);
+        setVotingTimer(0);
+        localStorage.removeItem("game_writing_time");
+        localStorage.removeItem("game_voting_time");
+        socket.emit("goto_leaderboard", state?.gamepine);
     }
 
     const startVoting = () => {
@@ -126,7 +127,7 @@ const GameReview = ({ socket, role }) => {
         setVotingTimer(0);
         localStorage.removeItem("game_writing_time");
         localStorage.removeItem("game_voting_time");
-        navigate(`/admin/${state?.gamepine}/review?voting`, { state: { ...state, role: role, nowVoting: true } });
+        navigate(`/admin/${state?.gamepine}/review?voting=1`, { state: { ...state, role: role, nowVoting: true } });
         socket.emit('start_vote', state?.gamepine);
     }
 
@@ -146,19 +147,15 @@ const GameReview = ({ socket, role }) => {
 
 
     /**
-     * delete answer by admin
+     * rewrite the answer request
      * @param {answer_id} id 
      * @returns 
      */
-    const removeAnswer = (id) => {
-        if (!window.confirm("Do you want to delete?")) return;
-        API.game.removeAnswer({
+    const rewriteRequest = (id) => {
+        // if (!window.confirm("Do you want to delete?")) return;
+        socket.emit("rewrite_answer_request", {
             gamepine: state?.gamepine,
             answerId: id
-        }).then(() => {
-            const deleteAnswers = [...answers].filter((answer) => answer._id !== id);
-            setAnswers(deleteAnswers);
-            toast.success("Successfully Removed.")
         })
     }
 
@@ -224,8 +221,19 @@ const GameReview = ({ socket, role }) => {
             socket.emit('identity_admin', state.gamepine)
         }
 
-        socket.on("get_answers", (to_admin) => {
-            if (to_admin && !role) return;
+        socket.on("get_answers", (username) => {
+            const params = new Proxy(new URLSearchParams(window.location.search), {
+                get: (searchParams, prop) => searchParams.get(prop),
+            });
+            let queryVal = params.voting;
+            if(state?.role && queryVal) {                
+                if(voteUsers.indexOf(username) < 0) voteUsers.push(username);
+                console.log(voteUsers.length, state.users.length);
+                if(voteUsers.length >= state.users.length){
+                    voteUsers = [];
+                    gotoLeaderboard();
+                }
+            }
             getAnswers();
         })
 
@@ -239,10 +247,15 @@ const GameReview = ({ socket, role }) => {
 
         const gameState = localstore.getObj('game_state');
         setGameData(gameState);
-        if(!role && !state?.isFinalsVote){
+        if (!role && !state?.isFinalsVote) {
             console.log(state?.groupInd)
             getAnswers(state?.groupInd);
         } else getAnswers();
+
+        return () => {
+            socket.off('get_answers');
+            socket.off('goto_leaderboard');
+        };
     }, [])
 
     return (
@@ -313,7 +326,7 @@ const GameReview = ({ socket, role }) => {
                                     role={role}
                                     readOnly={readOnly}
                                     isFinalsVote={state?.isFinalsVote}
-                                    removeAnswer={removeAnswer}
+                                    rewriteRequest={rewriteRequest}
                                     handleClickVote={handleClickVote}
                                     onBlurUsername={onBlurUsername} />
                             )

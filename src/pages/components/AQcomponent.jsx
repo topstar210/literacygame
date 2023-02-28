@@ -1,18 +1,29 @@
+import { ClipboardEvent } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toast } from 'react-toastify';
 
 const AQcomponent = (props) => {
-    const { 
-        currQuestion, 
-        questions, 
-        settings, 
-        countDownTime, 
-        clickSaveReply, 
+    const {
+        currQuestion,
+        questions,
+        settings,
+        countDownTime,
+        clickSaveReply,
         readonly,
-        answer, 
-        setAnswer, 
-        answerLen, 
-        setAnswerlen 
+        answer,
+        setAnswer,
+        answerLen,
+        setAnswerlen
     } = props;
+
+    /**
+     * the func for prevent cut, copy and past
+     * @param {ClipboardEvent} e 
+     */
+    const preventCopyPaste = (e: ClipboardEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        toast.warning("Copying and pasting is not allowed!");
+    }
 
     /**
      * action of when change answer textarea
@@ -46,6 +57,9 @@ const AQcomponent = (props) => {
                         <textarea
                             value={answer}
                             onChange={e => handleChangeAnswer(e)}
+                            onCopy={(e) => preventCopyPaste(e)}  
+                            onPaste={(e) => preventCopyPaste(e)}  
+                            onCut={(e) => preventCopyPaste(e)}
                             className="focus:outline-none border border-custom indent-2 w-full p-2 min-h-[200px]" cols="30"></textarea>
                         <div className="flex items-center">
                             {
@@ -63,7 +77,7 @@ const AQcomponent = (props) => {
                 <div className="md:w-4/12 flex justify-center p-5">
                     <div className="">
                         {questions[currQuestion]?.img !== "" &&
-                            <img src={`${process.env.REACT_APP_SERVERURL}${questions[currQuestion]?.img}`} width="100%" alt="PT" />
+                            <img src={`${process.env.REACT_APP_FILEURL}${questions[currQuestion]?.img}`} width="100%" alt="PT" />
                         }
                     </div>
                 </div>

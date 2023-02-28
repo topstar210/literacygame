@@ -80,6 +80,11 @@ const Leaderboard = ({ socket }) => {
         getAnswers();
         const groups = utils.getTotalGroup(state?.settings?.group, localstore.getObj("game_state").users ?? []);
         setGroups(groups);
+        
+        return () => {
+            socket.off('goto_next_question');
+            socket.off('goto_finals_vote');
+        };
     }, [])
 
     return (

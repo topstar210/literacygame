@@ -75,10 +75,10 @@ class WebSockets {
                 gamepine: String,
          * }
          */
-        client.on("get_answers", async (gamepine, to_admin) => {
+        client.on("get_answers", async (gamepine, username) => {
             console.log('get_answers', gamepine)
             client.join(gamepine);
-            global.io.to(gamepine).emit('get_answers', to_admin);
+            global.io.to(gamepine).emit('get_answers', username);
         })
 
         /**
@@ -105,6 +105,11 @@ class WebSockets {
         client.on("start_vote", (gamepine)=>{
             console.log('start_vote', gamepine)
             global.io.to(gamepine).emit('start_vote');
+        })
+
+        client.on("rewrite_answer_request", (data)=>{
+            console.log('rewrite_answer_request   ====> answer id=', data.answerId)
+            global.io.to(data.gamepine).emit('rewrite_answer_request', data);
         })
     }
 }

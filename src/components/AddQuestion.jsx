@@ -21,7 +21,7 @@ const AddQuestion = (props) => {
                     placeholder="This is the prompt that the students will answer. Add your question or activity here." ></textarea>
             </div>
             <div>
-                <img onClick={ ()=>handleClickPicture() } width="235" src={question.img===""?`/images/defualt_img.png`:`${process.env.REACT_APP_SERVERURL}${question.img}`} alt="DF" />
+                <img onClick={ ()=>handleClickPicture() } width="235" src={question.img===""?`/images/defualt_img.png`:`${process.env.REACT_APP_FILEURL}${question.img}`} alt="DF" />
                 <form action="" method="post" className="hidden" encType="multipart/form-data">
                     <input
                         type="file"

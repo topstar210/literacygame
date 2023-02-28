@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useState } from 'react';
 
 const Answercard = (props) => {
-    const { ind, v, role, onBlurUsername, handleClickVote, removeAnswer, readOnly, isFinalsVote } = props;
+    const { ind, v, role, onBlurUsername, handleClickVote, rewriteRequest, isFinalsVote } = props;
 
     const [username, setUsername] = useState("");
 
@@ -17,16 +17,16 @@ const Answercard = (props) => {
 
             {role &&
                 <button
-                    onClick={() => removeAnswer(v._id)}
-                    className="rounded-full w-[25px] h-[25px] absolute -right-[13px] -top-[13px] bg-sky-600">
-                    <FontAwesomeIcon icon="remove" className="text-sm text-white" />
+                    onClick={() => rewriteRequest(v._id)}
+                    className="rounded-full w-[25px] h-[25px] leading-[0.7] absolute -right-[13px] -top-[12px] bg-sky-600">
+                    <FontAwesomeIcon icon="rotate-backward" className="text-white text-[11px]" />
                 </button>
             }
             <div className="answer w-5/6 break-words text-custom">
                 {v.answer}
                 <div className="flex text-white mt-2">
                     <div className="">
-                        {role &&
+                        {false &&
                             <>
                                 <FontAwesomeIcon icon="user" className="" />
                                 <input
@@ -43,8 +43,8 @@ const Answercard = (props) => {
             <div className="block text-white">
                 {role &&
                     <>
-                        <div className="text-right">{!isFinalsVote ? (v.votes ? v.votes : 0) : (v.finalsVotes ? v.finalsVotes : 0)} Votes</div>
-                        <div className="text-right">{!isFinalsVote ? (v.points ? v.points : 0) : (v.finalsPoints ? v.finalsPoints : 0)} Points</div>
+                        <div className="text-right text-sm">{!isFinalsVote ? (v.votes ? v.votes : 0) : (v.finalsVotes ? v.finalsVotes : 0)} Votes</div>
+                        <div className="text-right text-sm">{!isFinalsVote ? (v.points ? v.points : 0) : (v.finalsPoints ? v.finalsPoints : 0)} Points</div>
                     </>
                 }
                 {!role &&

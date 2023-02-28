@@ -26,16 +26,21 @@ const AnswerQuestions = ({ socket }) => {
         if (answer === "") return;
 
         const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
-        console.log(gameData?.settings?.group, gameData.users, state.username, groupInfo);
+
+        // console.log(gameData?.settings?.group, gameData.users, state.username, groupInfo);
+        const editable = localstore.getObj("game_my_answer") ? 1 : 0;
         const aData = {
             ...gameData,
             quesInd: gameData.currQuestion,
             username: state.username,
             groupInd: groupInfo.userGroupInd,
-            answer
+            answer,
+            editable,
         }
+        if (editable) aData.answerId = localstore.getObj("game_my_answer")?._id;
         API.game.answer(aData).then((res) => {
             setReadonly(true);
+            localstore.saveObj('game_my_answer', res.data);
             localStorage.setItem('game_areply_readyonly', true);
             toast.success("Saved and Sent!");
             setTimeout(() => {
@@ -46,13 +51,13 @@ const AnswerQuestions = ({ socket }) => {
 
     useEffect(() => {
         const interval = setTimeout(() => {
-            if(writingTimer > 0){
-                const leftTime = writingTimer*1 - 1;
+            if (writingTimer > 0) {
+                const leftTime = writingTimer * 1 - 1;
                 // console.log("left writing time is ", leftTime);
 
                 setWritingTimer(leftTime);
                 localStorage.setItem("game_writing_time", leftTime);
-                if(leftTime <= 0){
+                if (leftTime <= 0) {
                     saveReply();
                 }
             }
@@ -75,9 +80,20 @@ const AnswerQuestions = ({ socket }) => {
         })
 
         socket.on("start_vote", () => {
+            localStorage.removeItem("game_my_answer");
             const gameData = localstore.getObj("game_state") ?? {};
             const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
             navigate(`/game/${state.gamepine}/review`, { state: { ...state, ...gameData, groupInd: groupInfo.userGroupInd, nowVoting: true, role: 0 } });
+        })
+
+        socket.on("rewrite_answer_request", (data) => {
+            const localAnswer = localstore.getObj("game_my_answer");
+            console.log(data, localAnswer);
+            if (localAnswer?._id === data.answerId) {
+                toast.warning("Admin is asking you to rewrite your answer.");
+                setReadonly(false);
+                localStorage.setItem('game_areply_readyonly', false);
+            }
         })
 
         const gameState = localstore.getObj("game_state") ?? {};
@@ -88,7 +104,13 @@ const AnswerQuestions = ({ socket }) => {
         }
 
         const timer = localStorage.getItem("game_writing_time");
-        setWritingTimer(timer ? timer*1 : state?.settings?.writingTimer); // when reload, writing timeing
+        setWritingTimer(timer ? timer * 1 : state?.settings?.writingTimer); // when reload, writing timeing
+
+        return () => {
+            socket.off('start_game');
+            socket.off('start_vote');
+            socket.off('rewrite_answer_request');
+        };
     }, [])
 
     return (

@@ -41,14 +41,22 @@ export default {
     },
 
     saveAnswer: async (req, res) => {
-        const data = new Answer(req.body);
-        data.save()
-            .then(item => {
-                res.send("item saved to database");
-            })
-            .catch(err => {
-                res.status(400).send("unable to save to database");
+        if(req.body.editable) {
+            const conditions = {'_id': req.body.answerId}
+            Answer.findOneAndUpdate(conditions, { answer: req.body.answer }, (err, answer) => {
+                if (err) return handleError(err);
+                if (answer) res.send(JSON.stringify(answer));
             });
+        } else {
+            const data = new Answer(req.body);
+            data.save()
+                .then(item => {
+                    res.send(JSON.stringify(item));
+                })
+                .catch(err => {
+                    res.status(400).send("unable to save to database");
+                });
+        }
     },
 
     getAnswers: async (req, res) => {

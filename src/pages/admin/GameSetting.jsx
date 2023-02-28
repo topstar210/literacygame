@@ -20,7 +20,7 @@ const GameSetting = ({ socket }) => {
     const [currRule, setCurrRule] = useState('C');
     const [settings, setSettings] = useState({
         group: 10,
-        limitChars: 400,
+        limitChars: 800,
         writingTimer: 300,
         votingTimer: 70
     });
@@ -113,35 +113,35 @@ const GameSetting = ({ socket }) => {
         if (rule === "N") {
             setting = {
                 group: 5,
-                limitChars: 400,
+                limitChars: 800,
                 writingTimer: 300,
                 votingTimer: 70
             }
         } else if (rule === "S") {
             setting = {
                 group: 3,
-                limitChars: 400,
+                limitChars: 800,
                 writingTimer: 60,
                 votingTimer: 40
             }
         } else if (rule === "R") {
             setting = {
                 group: 7,
-                limitChars: 400,
+                limitChars: 800,
                 writingTimer: 240,
                 votingTimer: 60
             }
         } else if (rule === "E") {
             setting = {
                 group: 10,
-                limitChars: 400,
+                limitChars: 800,
                 writingTimer: 0,
                 votingTimer: 0
             }
         } else {
             setting = {
                 group: 10,
-                limitChars: 400,
+                limitChars: 800,
                 writingTimer: 300,
                 votingTimer: 70
             }
@@ -237,7 +237,7 @@ const GameSetting = ({ socket }) => {
                                 <div className="h-1 w-full mb-3">
                                     <Slider
                                         min={0}
-                                        max={400}
+                                        max={800}
                                         defaultValue={settings.limitChars}
                                         currentValue={settings.limitChars}
                                         setCurrentValue={(val) => setSettings({ ...settings, limitChars: val })}

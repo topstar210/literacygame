@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import io from 'socket.io-client';
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove } from "@fortawesome/free-solid-svg-icons";
+import { faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove, faRotateBackward } from "@fortawesome/free-solid-svg-icons";
 
 import CreateGame from "./pages/admin/GreateGame";
 import GameSetting from "./pages/admin/GameSetting";
@@ -12,7 +12,7 @@ import StartGame from "./pages/game/Firstpage";
 import AnswerQuestions from "./pages/game/AnswerQuestions";
 import Leaderboard from "./pages/components/Leaderboard";
 
-library.add(faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove);
+library.add(faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove, faRotateBackward);
 
 const socket = io(process.env.REACT_APP_SOCKETURL);
 
