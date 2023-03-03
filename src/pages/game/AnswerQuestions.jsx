@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import AQcomponent from "../components/AQcomponent";
+import AQcomponent from "../shared-components/AQcomponent";
 import localstore from "../../utils/localstore";
 import API from "../../provider/API";
 import utils from "../../utils";

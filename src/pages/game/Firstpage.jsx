@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import localstore from "utils/localstore.js";
+
 import API from "../../provider/API.js";
+import Topbar from "../shared-components/Topbar.jsx";
 
 const Firstpage = ({socket}) => {
     const navigate = useNavigate();
@@ -31,13 +34,13 @@ const Firstpage = ({socket}) => {
     }
 
     useEffect(()=>{
-        localStorage.clear();
+        localstore.clearLocalStoreVariables()
     },[])
 
     return (
         <div className="h-screen bg-blue-400 flex justify-center place-items-center">
-            <ToastContainer />
-            <div className="animate-fadeIn">
+            <Topbar />
+            <div className="animate-fadeIn -mt-[100px]">
                 <button
                     onClick={() => setIsShowGname(!isShowGname)}
                     className="uppercase rounded-full border-4 border-white -mt-5 px-14 py-4 text-white text-3xl font-bold">start game</button>
@@ -65,6 +68,7 @@ const Firstpage = ({socket}) => {
                     </div>
                 }
             </div>
+            <ToastContainer />
         </div>
     )
 }

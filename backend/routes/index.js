@@ -2,20 +2,26 @@ import express from 'express';
 import mongoose from "mongoose";
 
 // controllers
-import users from '../controllers/user.js';
+import Users, { Register, Login, Logout } from "../controllers/User.js";
 // middlewares
-import { encode } from '../middlewares/jwt.js';
+import { verifyToken } from '../middlewares/jwt.js';
+import { refreshToken } from "../controllers/RefreshToken.js";
 
 const router = express.Router();
 
 router
-  .post('/login/:userId', encode, (req, res, next) => { })
+  .post('/users', Register)
+  .post('/login', Login)
+  .get('/token', refreshToken)
+  .delete('/logout', Logout)
+  .post('/login/:userId', verifyToken, (req, res, next) => { })
+
   // for dev
-  .get('/clean_db', (req, res) => { 
-    mongoose.connection.db.dropCollection('answers', function(err, result) {
+  .get('/clean_db', (req, res) => {
+    mongoose.connection.db.dropCollection('answers', function (err, result) {
       console.log("successfully drop the answers collection")
     });
-    mongoose.connection.db.dropCollection('game', function(err, result) {
+    mongoose.connection.db.dropCollection('game', function (err, result) {
       console.log("successfully drop the game collection")
     });
     res.send("successfully drop the collections");

@@ -1,13 +1,25 @@
+import './index.css';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { Provider } from 'react-redux'
+
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import store from './store'
+import AuthProvider from './provider/AuthProvider.js';
+
+import axios from "axios";
+axios.defaults.withCredentials = true;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </Provider>
   </React.StrictMode>
 );
 

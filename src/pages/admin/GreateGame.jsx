@@ -4,6 +4,7 @@ import cryptoRandomString from 'crypto-random-string';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import API from "../../provider/API.js";
+import localstore from "utils/localstore.js";
 
 const CreateGame = ({socket}) => {
     const navigate = useNavigate();
@@ -38,7 +39,7 @@ const CreateGame = ({socket}) => {
     }
     
     useEffect(()=>{
-        localStorage.clear();
+        localstore.clearLocalStoreVariables();
     },[])
 
     return (

@@ -1,5 +1,3 @@
-import game from "../controllers/game.js";
-
 let users = [];
 let _this = null;
 

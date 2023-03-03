@@ -1,33 +1,46 @@
 import axios from "axios";
+import store from "store";
 
-const API = axios.create({
+const axiosJWT = axios.create({
   baseURL: process.env.REACT_APP_SERVERURL,
   headers: {
     "Access-Control-Allow-Origin": "*",
   },
 });
 
-API.auth = {
-  login: (data) => API.post(`/auth/login`, data),
+axiosJWT.interceptors.request.use(async (config) => {
+  const appStore = store.getState();
+  const { sapp } = appStore;
+  config.headers.Authorization = `Bearer ${sapp.accToken}`;
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+axiosJWT.defaults.withCredentials = true;
+
+axiosJWT.auth = {
+  login: (data) => axiosJWT.post(`/login`, data),
+  register: (data) => axiosJWT.post(`/users`, data),
+  getToken: () => axiosJWT.get(`/token`),
 };
 
-API.game = {
-  create: (data) => API.post(`/game/create`, data),
-  checkpine: (data) => API.post(`/game/checkpine`, data),
+axiosJWT.game = {
+  create: (data) => axiosJWT.post(`/game/create`, data),
+  checkpine: (data) => axiosJWT.post(`/game/checkpine`, data),
 
-  saveSetting: (data) => API.post(`/game/${data.gamepine}/setting`, data),
-  getSetting: (data) => API.get(`/game/${data.gamepine}/setting`),
+  saveSetting: (data) => axiosJWT.post(`/game/${data.gamepine}/setting`, data),
+  getSetting: (data) => axiosJWT.get(`/game/${data.gamepine}/setting`),
 
-  answer: (data) => API.post(`/game/${data.gamepine}/answer`, data),
-  getAnswer: (data) => API.get(`/game/${data.gamepine}/answer`, { params: data }),
-  removeAnswer: (data) => API.delete(`/game/${data.gamepine}/answer/${data.answerId}`),
+  answer: (data) => axiosJWT.post(`/game/${data.gamepine}/answer`, data),
+  getAnswer: (data) => axiosJWT.get(`/game/${data.gamepine}/answer`, { params: data }),
+  removeAnswer: (data) => axiosJWT.delete(`/game/${data.gamepine}/answer/${data.answerId}`),
 
-  saveVote: (data) => API.post(`/game/${data.gamepine}/vote`, data),
-  changeUsername: (data) => API.post(`/game/${data.gamepine}/changeusername`, data),
+  saveVote: (data) => axiosJWT.post(`/game/${data.gamepine}/vote`, data),
+  changeUsername: (data) => axiosJWT.post(`/game/${data.gamepine}/changeusername`, data),
 
 };
 
-API.file = {
-    save: (data) => API.post(`/file/save`, data),
+axiosJWT.file = {
+  save: (data) => axiosJWT.post(`/file/save`, data),
 }
-export default API;
+export default axiosJWT;
