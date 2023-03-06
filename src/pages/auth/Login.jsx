@@ -24,7 +24,7 @@ const Login = () => {
                 type: SET_USER_INFO,
                 payload: loginRes.data
             })
-            navigate("/");
+            navigate("/admin");
         } catch (error) {
             if (error.response) {
                 toast.error(error.response.data.msg);

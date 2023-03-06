@@ -9,7 +9,6 @@ const Topbar = () => {
     const [isLogin, setIsLogin] = useState(false);
 
     useEffect(() => {
-        console.log("sapp.accToken", sapp)
         if (sapp.accToken) {
             setIsLogin(true);
         }

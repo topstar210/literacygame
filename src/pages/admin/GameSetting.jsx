@@ -8,6 +8,12 @@ import AddQuestion from "../../components/AddQuestion";
 import Slider from "../../components/Slider";
 import localstore from "../../utils/localstore.js";
 
+const questionObj = { 
+    val: "", 
+    img: "", 
+    keywords:[] 
+}
+
 const GameSetting = ({ socket }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -16,7 +22,7 @@ const GameSetting = ({ socket }) => {
 
     const [startLoad, setStartLoad] = useState(false);
     const [currentusers, setCurrentusers] = useState([]);
-    const [questions, setQuestions] = useState([{ val: "", img: "" }]);
+    const [questions, setQuestions] = useState([{...questionObj}]);
     const [currRule, setCurrRule] = useState('C');
     const [settings, setSettings] = useState({
         group: 10,
@@ -37,10 +43,23 @@ const GameSetting = ({ socket }) => {
     }
 
     /**
+     * add extra keyword
+     * @param {Object} data 
+     * @param {Number} qInd 
+     */
+    const addExtraKeyword = (data, qInd) => {
+        let tempQ = [...questions];
+        let tempEk = [...tempQ[qInd]['keywords'], data];
+        tempQ[qInd]['keywords'] = tempEk;
+        console.log(questions, data, qInd);
+        setQuestions(tempQ);
+    }
+
+    /**
      * Action of when click "Add Question"
      */
     const handleClickAddQuestion = () => {
-        setQuestions([...questions, { val: "", img: "" }]);
+        setQuestions([...questions, {...questionObj}]);
     }
 
     /**
@@ -279,7 +298,9 @@ const GameSetting = ({ socket }) => {
                     <div className="mb-4 rounded bg-white px-6 py-4 pb-20 relative">
                         {
                             questions && questions.map(
-                                (v, i) => <AddQuestion key={i} qInd={i} question={v}
+                                (v, i) => <AddQuestion key={i} qInd={i} 
+                                    question={v}
+                                    addExtraKeyword={addExtraKeyword}
                                     handleChangePicture={handlePicture}
                                     handleChangeQuestion={changeQuestion} />
                             )

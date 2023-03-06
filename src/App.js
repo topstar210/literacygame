@@ -2,7 +2,17 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import io from 'socket.io-client';
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove, faRotateBackward } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faUsers, 
+  faPenAlt, 
+  faBusinessTime, 
+  faPlusCircle, 
+  faClock, 
+  faUser, 
+  faRemove, 
+  faRotateBackward, 
+  faSave 
+} from "@fortawesome/free-solid-svg-icons";
 
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/Signup";
@@ -15,18 +25,18 @@ import StartGame from "./pages/game/Firstpage";
 import AnswerQuestions from "./pages/game/AnswerQuestions";
 import Leaderboard from "./pages/shared-components/Leaderboard";
 
-library.add(faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove, faRotateBackward);
+library.add(faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove, faRotateBackward, faSave);
 
 const socket = io(process.env.REACT_APP_SOCKETURL);
 
 const App = () => {
-  
+
   return (
     <>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<SignUp /> } />
+          <Route path="/register" element={<SignUp />} />
 
           <Route path="/admin" element={<CreateGame socket={socket} />} />
           <Route path="/admin/:gamepine/setting" element={<GameSetting socket={socket} />} />
