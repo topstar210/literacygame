@@ -36,6 +36,17 @@ const utils = {
         for (let i = 1; i < interval_id; i++) {
             window.clearInterval(i);
         }
+    },
+
+    calcKeywordPoint: async (keywords, answer) => {
+        let extraKeyword = 0;
+        for(let i=0; i < keywords.length; i++) {
+            let keyword = keywords[i];
+            if(answer.indexOf(keyword[0]) > -1){
+                extraKeyword += parseInt(keyword[1]);
+            }
+        }
+        return extraKeyword;
     }
 }
 

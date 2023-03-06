@@ -10,7 +10,8 @@ const answerSchema = new mongoose.Schema(
     votes: { type: Number, default: 0 },
     points: { type: Number, default: 0 },
     finalsVotes: { type: Number, default: 0 },
-    finalsPoints: { type: Number, default: 0 }
+    finalsPoints: { type: Number, default: 0 },
+    extraPoints: { type: Number, default: 0 },
   },
   {
     timestamps: true,

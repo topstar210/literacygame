@@ -248,7 +248,6 @@ const GameReview = ({ socket, role }) => {
         const gameState = localstore.getObj('game_state');
         setGameData(gameState);
         if (!role && !state?.isFinalsVote) {
-            console.log(state?.groupInd)
             getAnswers(state?.groupInd);
         } else getAnswers();
 

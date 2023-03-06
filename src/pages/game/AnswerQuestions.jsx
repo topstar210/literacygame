@@ -21,13 +21,15 @@ const AnswerQuestions = ({ socket }) => {
     const [answerLen, setAnswerlen] = useState(0);
     const [writingTimer, setWritingTimer] = useState(0);
 
-    const saveReply = () => {
+    const saveReply = async () => {
         utils.clearInvervalVals();
         if (answer === "") return;
 
         const groupInfo = utils.getGroupByUsername(gameData?.settings?.group, gameData.users, state.username);
 
-        // console.log(gameData?.settings?.group, gameData.users, state.username, groupInfo);
+        const { keywords } = questions[currQuestion];
+        const keywordPoint = await utils.calcKeywordPoint(keywords, answer);
+
         const editable = localstore.getObj("game_my_answer") ? 1 : 0;
         const aData = {
             ...gameData,
@@ -35,6 +37,8 @@ const AnswerQuestions = ({ socket }) => {
             username: state.username,
             groupInd: groupInfo.userGroupInd,
             answer,
+            points: keywordPoint,
+            extraPoints: keywordPoint,
             editable,
         }
         if (editable) aData.answerId = localstore.getObj("game_my_answer")?._id;
@@ -88,7 +92,6 @@ const AnswerQuestions = ({ socket }) => {
 
         socket.on("rewrite_answer_request", (data) => {
             const localAnswer = localstore.getObj("game_my_answer");
-            console.log(data, localAnswer);
             if (localAnswer?._id === data.answerId) {
                 toast.warning("Admin is asking you to rewrite your answer.");
                 setReadonly(false);

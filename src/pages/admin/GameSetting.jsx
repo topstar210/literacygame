@@ -51,7 +51,6 @@ const GameSetting = ({ socket }) => {
         let tempQ = [...questions];
         let tempEk = [...tempQ[qInd]['keywords'], data];
         tempQ[qInd]['keywords'] = tempEk;
-        console.log(questions, data, qInd);
         setQuestions(tempQ);
     }
 
