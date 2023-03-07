@@ -14,6 +14,7 @@ const Leaderboard = ({ socket }) => {
     const [answers, setAnswers] = useState([]);
     const [groups, setGroups] = useState(1);
     const [currGroup, setCurrGroup] = useState(1);
+    const [extraKey, setExtraKey] = useState();
 
     const completeQuestion = (role) => {
         if (groups > 1 && !state?.isFinalsVote) {
@@ -78,9 +79,12 @@ const Leaderboard = ({ socket }) => {
             navigate(navlink, { state: { ...state, isFinalsVote: true } });
         })
 
-        getAnswers();
         const groups = utils.getTotalGroup(state?.settings?.group, localstore.getObj("game_state").users ?? []);
         setGroups(groups);
+        getAnswers();
+
+        const currQues = state.questions[state.currQuestion];
+        setExtraKey(currQues?.keywords)
 
         return () => {
             socket.off('goto_next_question');
@@ -90,6 +94,15 @@ const Leaderboard = ({ socket }) => {
 
     return (
         <div className="flex justify-center">
+            <div className="fixed left-0 top-20">
+                {extraKey &&
+                    extraKey.map((v, i) =>
+                        <div className="bg-red-600 rounded-r-full text-white text-lg px-2 mb-3">
+                            { v[0] }: { v[1] }
+                        </div>
+                    )
+                }
+            </div>
             <div className="h-screen w-full bg-blue-400 px-5 sm:px-10 md:px-20 max-w-[1200px] animate-fadeIn">
                 <div className="flex flex-wrap py-3 items-center justify-between px-5 text-white">
                     {role &&
@@ -223,7 +236,7 @@ const Leaderboard = ({ socket }) => {
                                                     <>
                                                         Votes: {!state?.isFinalsVote ? (answer.votes ? answer.votes : 0) : (answer.finalsVotes ? answer.finalsVotes : 0)}  &nbsp;&nbsp;
                                                         Points: {!state?.isFinalsVote ? (answer.points ? answer.points : 0) : (answer.finalsPoints ? answer.finalsPoints : 0)}
-                                                         {/* (Extra: {answer.extraPoints}) */}
+                                                        {/* (Extra: {answer.extraPoints}) */}
                                                     </>
                                                 }
                                             </div>
