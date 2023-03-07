@@ -29,6 +29,7 @@ const Leaderboard = ({ socket }) => {
      */
     const onChangeGroups = e => {
         const groupInd = e.target.value;
+        console.log(groupInd)
         getAnswers(groupInd < 0 ? null : groupInd);
         setCurrGroup(groupInd);
     }
@@ -39,7 +40,7 @@ const Leaderboard = ({ socket }) => {
             quesInd: state?.currQuestion,
         }
         if (!state?.isFinalsVote) {
-            params.groupInd = gInd ?? (state.groupInd ?? currGroup);
+            params.groupInd = gInd
         } else {
             params.byFinals = state?.isFinalsVote;
         }
@@ -138,9 +139,9 @@ const Leaderboard = ({ socket }) => {
                                                 <div>
                                                     Points: {!state?.isFinalsVote ? (answers[0].points ? answers[0].points : 0) : (answers[0].finalsPoints ? answers[0].finalsPoints : 0)}
                                                 </div>
-                                                <div>
+                                                {/* <div>
                                                     Extra: {answers[0].extraPoints}
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     }
@@ -163,7 +164,7 @@ const Leaderboard = ({ socket }) => {
                                         <div className="flex justify-center">
                                             <img src="/images/winner2.png" alt="winner 2" width="75%" />
                                         </div>
-                                        <div className="text-center text-white text-xl">
+                                        <div className="flex justify-center text-white text-xl">
                                             {role &&
                                                 <div className="flex">
                                                     Votes: {!state?.isFinalsVote ? (answers[1].votes ? answers[1].votes : 0) : (answers[1].finalsVotes ? answers[1].finalsVotes : 0)}  &nbsp;&nbsp;
@@ -171,9 +172,9 @@ const Leaderboard = ({ socket }) => {
                                                         <div>
                                                             Points: {!state?.isFinalsVote ? (answers[1].points ? answers[1].points : 0) : (answers[1].finalsPoints ? answers[1].finalsPoints : 0)}
                                                         </div>
-                                                        <div>
+                                                        {/* <div>
                                                             Extra: {answers[1].extraPoints}
-                                                        </div>
+                                                        </div> */}
                                                     </div>
                                                 </div>
                                             }
@@ -189,7 +190,7 @@ const Leaderboard = ({ socket }) => {
                                             <div className="flex justify-center">
                                                 <img src="/images/winner3.png" alt="winner 2" width="70%" />
                                             </div>
-                                            <div className="text-center text-white text-xl">
+                                            <div className="flex justify-center text-white text-xl">
                                                 {
                                                     role &&
                                                     <div className="flex">
@@ -198,9 +199,9 @@ const Leaderboard = ({ socket }) => {
                                                             <div>
                                                                 Points: {!state?.isFinalsVote ? (answers[2].points ? answers[2].points : 0) : (answers[2].finalsPoints ? answers[2].finalsPoints : 0)}
                                                             </div>
-                                                            <div>
+                                                            {/* <div>
                                                                 Extra: {answers[2].extraPoints}
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                     </div>
                                                 }
@@ -221,7 +222,8 @@ const Leaderboard = ({ socket }) => {
                                                 {role &&
                                                     <>
                                                         Votes: {!state?.isFinalsVote ? (answer.votes ? answer.votes : 0) : (answer.finalsVotes ? answer.finalsVotes : 0)}  &nbsp;&nbsp;
-                                                        Points: {!state?.isFinalsVote ? (answer.points ? answer.points : 0) : (answer.finalsPoints ? answer.finalsPoints : 0)} (Extra: {answer.extraPoints})
+                                                        Points: {!state?.isFinalsVote ? (answer.points ? answer.points : 0) : (answer.finalsPoints ? answer.finalsPoints : 0)}
+                                                         {/* (Extra: {answer.extraPoints}) */}
                                                     </>
                                                 }
                                             </div>
