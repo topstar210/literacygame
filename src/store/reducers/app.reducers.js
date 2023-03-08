@@ -16,6 +16,12 @@ const initialState = {
 export function appState(state = initialState, action) {
     switch (action.type) {
         case SET_USER_INFO:
+            if(action.payload === "Invalid_Token"){
+                return {
+                    ...state,
+                    accToken: action.payload
+                }
+            }
             const accToken = action.payload?.accessToken;
             const jwtDecoded = jwt_decode(accToken);
             localstore.saveObj("userInfo", jwtDecoded);

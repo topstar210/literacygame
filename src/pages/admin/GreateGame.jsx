@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import cryptoRandomString from 'crypto-random-string';
-import { useSelector } from "react-redux";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import API from "../../provider/API.js";
 import localstore from "utils/localstore.js";
+import { useSelector } from "react-redux";
 
 const CreateGame = ({socket}) => {
-    const sapp = useSelector((state) => state.sapp);
     const navigate = useNavigate();
     const [gamename, setGamename] = useState("");
     const [isShowGname, setIsShowGname] = useState(false);
-
+    const sapp = useSelector((state) => state.sapp);
     useEffect(() => {
-        if (!sapp.accToken) {
-            navigate('/login');
+        if(sapp.accToken && sapp.accToken==="Invalid_Token"){
+            navigate("/login");
         }
-    }, [sapp.accToken])
+    },[sapp.accToken])
 
     /**
      * Action of when click button named "Create Game"

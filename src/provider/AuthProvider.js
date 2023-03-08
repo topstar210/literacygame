@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import API from "provider/API";
@@ -15,7 +15,13 @@ const AuthProvider = (props) => {
                     type: SET_USER_INFO,
                     payload: tokenRes.data
                 })
-            });
+            }).catch((err)=>{
+                // console.log(err);
+                dispatch({
+                    type: SET_USER_INFO,
+                    payload: "Invalid_Token"
+                })
+            })
         }
     }, [sapp])
 

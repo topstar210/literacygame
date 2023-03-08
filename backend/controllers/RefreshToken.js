@@ -5,8 +5,8 @@ export const refreshToken = async(req, res) => {
     try {
         const refreshToken = req.cookies?.refreshToken;
         // console.log("refreshToken", req.cookies);
-        // if(!refreshToken) return res.sendStatus(401);
-        if(!refreshToken) return res.send("Unauthorized");
+        if(!refreshToken) return res.sendStatus(401);
+        // if(!refreshToken) return res.send("Unauthorized");
         
         const user = await Users.find({
             refresh_token: refreshToken

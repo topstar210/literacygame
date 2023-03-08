@@ -69,7 +69,8 @@ const Leaderboard = ({ socket }) => {
                 navlink = role ? `/admin/${state?.gamepine}/review` : `/game/${state?.gamepine}`;
                 navigate(navlink, { state: { ...state, currQuestion: nextQind, isFinalsVote: false, nowVoting: false } });
             } else {
-                window.location.href = navlink;
+                // window.location.href = navlink;
+                navigate(navlink)
             }
         });
 

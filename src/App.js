@@ -38,7 +38,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<SignUp />} />
 
-          <Route path="/admin" element={<CreateGame socket={socket} />} />
+          <Route path="/admin" element={<CreateGame socket={socket} role={true} />} />
           <Route path="/admin/:gamepine/setting" element={<GameSetting socket={socket} />} />
           <Route path="/admin/:gamepine/review" element={<GameReview socket={socket} role={true} />} />
 
