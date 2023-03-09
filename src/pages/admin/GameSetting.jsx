@@ -54,6 +54,14 @@ const GameSetting = ({ socket }) => {
         setQuestions(tempQ);
     }
 
+    const removeExtraKeyword = (ind, qInd) => {
+        let tempQ = [...questions];
+        let tempEk = [...tempQ[qInd]['keywords']];
+        tempEk.splice(ind,1)
+        tempQ[qInd]['keywords'] = tempEk;
+        setQuestions(tempQ);
+    }
+
     /**
      * Action of when click "Add Question"
      */
@@ -300,6 +308,7 @@ const GameSetting = ({ socket }) => {
                                 (v, i) => <AddQuestion key={i} qInd={i} 
                                     question={v}
                                     addExtraKeyword={addExtraKeyword}
+                                    removeExtraKeyword={removeExtraKeyword}
                                     handleChangePicture={handlePicture}
                                     handleChangeQuestion={changeQuestion} />
                             )

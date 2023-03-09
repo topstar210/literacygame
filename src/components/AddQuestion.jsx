@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 const AddQuestion = (props) => {
     const fileRef = useRef(null);
 
-    const { qInd, question, handleChangeQuestion, handleChangePicture, addExtraKeyword } = props;
+    const { qInd, question, handleChangeQuestion, handleChangePicture, addExtraKeyword, removeExtraKeyword } = props;
     const [showModal, setShowModal] = useState(false);
     const [keyword, setKeyword] = useState("");
     const [point, setPoint] = useState(0);
@@ -36,11 +36,14 @@ const AddQuestion = (props) => {
                         type="button"
                         onClick={() => setShowModal(true)}
                         className="px-2 border border-custom border-dashed text-custom rouned">Add Extra Keyword+</button>
-                    <div className="flex">
+                    <div className="flex flex-wrap">
                         {question.keywords?.length > 0 && 
                             question.keywords.map((v, i)=>
                             <div className="pl-2" key={i}>
-                                {v[0]}: {v[1]}
+                                {v[0]}: {v[1]} 
+                                <button type="button" onClick={() => removeExtraKeyword(i, qInd)}>
+                                    <FontAwesomeIcon icon="remove" className="mx-1 text-custom text-md" />
+                                </button>
                             </div>
                             )
                         }
