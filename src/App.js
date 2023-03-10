@@ -11,7 +11,8 @@ import {
   faUser, 
   faRemove, 
   faRotateBackward, 
-  faSave 
+  faSave,
+  faDownload 
 } from "@fortawesome/free-solid-svg-icons";
 
 import Login from "./pages/auth/Login";
@@ -25,7 +26,7 @@ import StartGame from "./pages/game/Firstpage";
 import AnswerQuestions from "./pages/game/AnswerQuestions";
 import Leaderboard from "./pages/shared-components/Leaderboard";
 
-library.add(faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove, faRotateBackward, faSave);
+library.add(faUsers, faPenAlt, faBusinessTime, faPlusCircle, faClock, faUser, faRemove, faRotateBackward, faSave, faDownload);
 
 const socket = io(process.env.REACT_APP_SOCKETURL);
 

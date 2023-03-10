@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import API from "../../provider/API";
 import utils from "../../utils";
 import localstore from "../../utils/localstore";
@@ -95,11 +96,11 @@ const Leaderboard = ({ socket }) => {
 
     return (
         <div className="flex justify-center">
-            <div className="fixed left-0 top-20">
+            <div className="fixed left-0 top-20 max-w-[150px]">
                 {extraKey &&
                     extraKey.map((v, i) =>
-                        <div className="bg-red-600 rounded-r-full text-white text-lg px-2 mb-3">
-                            { v[0] }: { v[1] }
+                        <div key={i} className="bg-red-600 rounded-r-full text-white text-lg px-2 mb-3">
+                            {v[0]}: {v[1]}
                         </div>
                     )
                 }
@@ -124,11 +125,19 @@ const Leaderboard = ({ socket }) => {
                             {state?.isFinalsVote &&
                                 <div className="uppercase text-xl font-bold">leaderboard</div>
                             }
-                            <button
-                                onClick={() => completeQuestion(role)}
-                                className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl">
-                                {groups > 1 ? (state?.isFinalsVote ? (state?.questions.length !== (state?.currQuestion + 1) ? "Next Question" : "Complete") : "Finals Vote") : (state?.questions.length !== (state?.currQuestion + 1) ? "Next Question" : "Complete")}
-                            </button>
+                            <div>
+                                <button
+                                    onClick={() => utils.exportResultToCSV(answers, state)}
+                                    className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl"
+                                    title="Download The Result to CSV File">
+                                    <FontAwesomeIcon icon="download" className="" />
+                                </button>
+                                <button
+                                    onClick={() => completeQuestion(role)}
+                                    className="bg-white text-sky-600 font-semibold px-5 border rounded-full text-2xl">
+                                    {groups > 1 ? (state?.isFinalsVote ? (state?.questions.length !== (state?.currQuestion + 1) ? "Next Question" : "Complete") : "Finals Vote") : (state?.questions.length !== (state?.currQuestion + 1) ? "Next Question" : "Complete")}
+                                </button>
+                            </div>
                         </>
                     }
                 </div>
