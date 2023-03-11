@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import API from "../../provider/API.js";
 import localstore from "utils/localstore.js";
 import { useSelector } from "react-redux";
+import Topbar from "../shared-components/Topbar.jsx";
 
 const CreateGame = ({socket}) => {
     const navigate = useNavigate();
@@ -52,6 +53,7 @@ const CreateGame = ({socket}) => {
     return (
         <div className="h-screen bg-blue-400 flex justify-center place-items-center">
             <ToastContainer />
+            <Topbar />
             <div className="animate-fadeIn">
                 <button
                     onClick={() => handleClickCreate()}

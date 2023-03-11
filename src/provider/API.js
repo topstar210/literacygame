@@ -20,6 +20,7 @@ axiosJWT.defaults.withCredentials = true;
 
 axiosJWT.auth = {
   login: (data) => axiosJWT.post(`/login`, data),
+  logout: (data) => axiosJWT.post(`/logout`, data),
   register: (data) => axiosJWT.post(`/users`, data),
   getToken: () => axiosJWT.get(`/token`),
 };

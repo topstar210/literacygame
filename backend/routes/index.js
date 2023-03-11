@@ -13,7 +13,7 @@ router
   .post('/users', Register)
   .post('/login', Login)
   .get('/token', refreshToken)
-  .delete('/logout', Logout)
+  .post('/logout', Logout)
   .post('/login/:userId', verifyToken, (req, res, next) => { })
 
   // for dev
